@@ -64,15 +64,21 @@ export function App() {
   const [preferredTemplateId, setPreferredTemplateId] = useState<string | null>(null);
   const [editorResetKey, setEditorResetKey] = useState(0);
   const [bootError, setBootError] = useState('');
-  const [isTemplateUnlocked, setIsTemplateUnlocked] = useState<boolean>(() => {
-    return sessionStorage.getItem('smart_invoice_template_unlocked') === 'true';
-  });
+  const [isTemplateUnlocked, setIsTemplateUnlocked] = useState<boolean>(false);
   const [passwordModal, setPasswordModal] = useState<{
     isOpen: boolean;
     title: string;
     description: string;
     action: () => void;
   } | null>(null);
+
+  // Automatically lock templates whenever navigating away from 'templates'
+  useEffect(() => {
+    if (section !== 'templates') {
+      sessionStorage.removeItem('smart_invoice_template_unlocked');
+      setIsTemplateUnlocked(false);
+    }
+  }, [section]);
 
   const handleLogout = () => {
     localStorage.removeItem('smart_invoice_auth_session');
@@ -89,8 +95,7 @@ export function App() {
     title = 'Admin Password Required',
     description = 'Enter the password to access invoice templates and editing.'
   ) => {
-    if (sessionStorage.getItem('smart_invoice_template_unlocked') === 'true') {
-      setIsTemplateUnlocked(true);
+    if (isTemplateUnlocked && section === 'templates') {
       action();
     } else {
       setPasswordModal({
@@ -146,8 +151,12 @@ export function App() {
 
   const navigate = (sec: NavSection) => {
     if (sec === 'templates') {
+      if (isTemplateUnlocked && section === 'templates') {
+        return;
+      }
       checkTemplateAuth(
         () => {
+          setIsTemplateUnlocked(true);
           setSection('templates');
           setMobileOpen(false);
         },
@@ -156,6 +165,11 @@ export function App() {
       );
       return;
     }
+
+    // Auto-lock templates whenever navigating to any other section
+    setIsTemplateUnlocked(false);
+    sessionStorage.removeItem('smart_invoice_template_unlocked');
+
     if (sec === 'create' && section !== 'create') {
       // Starting fresh when clicking Create New Invoice from nav
       setEditingInvoice(null);
@@ -410,9 +424,15 @@ export function App() {
       {editingTemplate && (
         <TemplateEditorModal
           template={editingTemplate}
-          onClose={() => setEditingTemplate(null)}
+          onClose={() => {
+            setEditingTemplate(null);
+            setIsTemplateUnlocked(false);
+            sessionStorage.removeItem('smart_invoice_template_unlocked');
+          }}
           onSaved={async () => {
             setEditingTemplate(null);
+            setIsTemplateUnlocked(false);
+            sessionStorage.removeItem('smart_invoice_template_unlocked');
             await refreshAll();
           }}
         />

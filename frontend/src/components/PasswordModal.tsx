@@ -20,7 +20,6 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
-  const [rememberSession, setRememberSession] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -37,9 +36,6 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
     }
 
     if (password === TEMPLATE_ACCESS_PASSWORD) {
-      if (rememberSession) {
-        sessionStorage.setItem('smart_invoice_template_unlocked', 'true');
-      }
       setError('');
       onSuccess();
     } else {
@@ -119,17 +115,9 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              id="remember_session"
-              type="checkbox"
-              checked={rememberSession}
-              onChange={(e) => setRememberSession(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label htmlFor="remember_session" className="text-xs text-slate-600 cursor-pointer select-none">
-              Keep unlocked for this browser session
-            </label>
+          <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-500">
+            <Lock className="h-3 w-3 text-slate-400" />
+            <span>Auto-locks immediately whenever you switch to another page.</span>
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
