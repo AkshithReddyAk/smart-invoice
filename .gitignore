@@ -1,0 +1,16 @@
+# Node
+node_modules/
+dist/
+.vite/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Data & Environment
+*.log
+.DS_Store
+.env
+.env.local
