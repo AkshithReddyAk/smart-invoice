@@ -1,16 +1,29 @@
 import React, { useRef, useState } from 'react';
-import { CheckCircle2, Database, Download, Save, Upload } from 'lucide-react';
+import {
+  CheckCircle2,
+  Database,
+  Download,
+  Eye,
+  EyeOff,
+  KeyRound,
+  RefreshCw,
+  Save,
+  ShieldAlert,
+  Upload,
+} from 'lucide-react';
 import { api } from '../api';
 import type { AppSettings, PaperSize } from '../types';
 
 interface SettingsViewProps {
   settings: AppSettings;
+  currentUserPhone?: string;
   onUpdated: (s: AppSettings) => void;
   onRestored: () => Promise<void>;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   settings,
+  currentUserPhone,
   onUpdated,
   onRestored,
 }) => {
@@ -20,6 +33,62 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [error, setError] = useState('');
   const logoRef = useRef<HTMLInputElement>(null);
   const restoreRef = useRef<HTMLInputElement>(null);
+
+  // Password Reset State
+  const [pwForm, setPwForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwError, setPwError] = useState('');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwMsg('');
+    setPwError('');
+
+    if (!currentUserPhone) {
+      setPwError('No active user phone found. Please log in again.');
+      return;
+    }
+    if (!pwForm.oldPassword) {
+      setPwError('Please enter your current password.');
+      return;
+    }
+    if (!pwForm.newPassword) {
+      setPwError('Please enter a new password.');
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError('New password and confirmation do not match.');
+      return;
+    }
+    if (pwForm.newPassword.length < 6) {
+      setPwError('New password must be at least 6 characters long.');
+      return;
+    }
+
+    setPwLoading(true);
+    try {
+      const res = await api.changePassword({
+        phone: currentUserPhone,
+        old_password: pwForm.oldPassword,
+        new_password: pwForm.newPassword,
+        confirm_password: pwForm.confirmPassword,
+      });
+      setPwMsg(res.message || 'Password changed successfully!');
+      setPwForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      setPwError(err.message || 'Failed to update password');
+    } finally {
+      setPwLoading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,6 +343,135 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </section>
       </form>
+
+      {/* User Security & Reset Password Section */}
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="border-b border-slate-100 pb-4 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <KeyRound className="h-5 w-5 text-indigo-600" /> Reset Password
+            </h2>
+            {currentUserPhone && (
+              <span className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-semibold text-indigo-700">
+                User: +91 {currentUserPhone}
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-slate-500">
+            Change your personal login and template password. This new password will be applicable for <strong>+91 {currentUserPhone || 'your account'} only</strong>.
+          </p>
+        </div>
+
+        {pwMsg && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span>{pwMsg}</span>
+          </div>
+        )}
+
+        {pwError && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-800">
+            <ShieldAlert className="h-4 w-4 text-rose-600 shrink-0" />
+            <span>{pwError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleChangePassword} className="space-y-4 max-w-xl">
+          {/* Old Password */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Current / Old Password *
+            </label>
+            <div className="relative">
+              <input
+                type={showOldPw ? 'text' : 'password'}
+                value={pwForm.oldPassword}
+                onChange={(e) => setPwForm({ ...pwForm, oldPassword: e.target.value })}
+                placeholder="Enter your current password"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOldPw(!showOldPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                tabIndex={-1}
+              >
+                {showOldPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* New Password */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                New Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPw ? 'text' : 'password'}
+                  value={pwForm.newPassword}
+                  onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                  placeholder="Min 6 characters"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPw(!showNewPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                >
+                  {showNewPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm New Password */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Confirm New Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPw ? 'text' : 'password'}
+                  value={pwForm.confirmPassword}
+                  onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                  placeholder="Re-type new password"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPw(!showConfirmPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                >
+                  {showConfirmPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <button
+              type="submit"
+              disabled={pwLoading || !pwForm.oldPassword || !pwForm.newPassword || !pwForm.confirmPassword}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50"
+            >
+              {pwLoading ? (
+                <>
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  <span>Updating Password...</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound className="h-3.5 w-3.5" />
+                  <span>Update Password</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </section>
 
       {/* Database Backup & Restore */}
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

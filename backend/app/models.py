@@ -24,6 +24,15 @@ class SchemaMigration(Base):
     applied_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
 
 
+class UserCredential(Base):
+    __tablename__ = "user_credentials"
+
+    phone = Column(String(32), primary_key=True)
+    password = Column(String(255), nullable=False)
+    role = Column(String(128), default="Authorized Staff", nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
 class CompanySettings(Base):
     __tablename__ = "company_settings"
 

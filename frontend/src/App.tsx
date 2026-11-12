@@ -414,6 +414,7 @@ export function App() {
           {section === 'settings' && settings && (
             <SettingsView
               settings={settings}
+              currentUserPhone={currentUser?.phone}
               onUpdated={(s) => setSettings(s)}
               onRestored={refreshAll}
             />
@@ -442,6 +443,7 @@ export function App() {
         <PasswordModal
           title={passwordModal.title}
           description={passwordModal.description}
+          currentUserPhone={currentUser?.phone}
           onSuccess={() => {
             const act = passwordModal.action;
             setPasswordModal(null);

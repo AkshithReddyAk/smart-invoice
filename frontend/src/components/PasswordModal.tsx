@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Eye, EyeOff, KeyRound, Lock, ShieldAlert, X } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, Lock, RefreshCw, ShieldAlert, X } from 'lucide-react';
+import { api } from '../api';
 
 interface PasswordModalProps {
   title?: string;
   description?: string;
+  currentUserPhone?: string;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -13,12 +15,14 @@ export const TEMPLATE_ACCESS_PASSWORD = 'Ak@200419';
 export const PasswordModal: React.FC<PasswordModalProps> = ({
   title = 'Admin Authorization Required',
   description = 'Enter the password to access invoice templates and edit field layouts.',
+  currentUserPhone,
   onSuccess,
   onClose,
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [verifying, setVerifying] = useState(false);
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -26,7 +30,7 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
     inputRef.current?.focus();
   }, []);
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!password) {
       setError('Please enter the password');
@@ -35,14 +39,30 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
       return;
     }
 
-    if (password === TEMPLATE_ACCESS_PASSWORD) {
-      setError('');
-      onSuccess();
+    if (currentUserPhone) {
+      setVerifying(true);
+      try {
+        await api.verifyPassword(currentUserPhone, password);
+        setError('');
+        onSuccess();
+      } catch (err: any) {
+        setError(err.message || 'Incorrect password. Please try again.');
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        inputRef.current?.select();
+      } finally {
+        setVerifying(false);
+      }
     } else {
-      setError('Incorrect password. Please try again.');
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      inputRef.current?.select();
+      if (password === TEMPLATE_ACCESS_PASSWORD) {
+        setError('');
+        onSuccess();
+      } else {
+        setError('Incorrect password. Please try again.');
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        inputRef.current?.select();
+      }
     }
   };
 
@@ -130,10 +150,20 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition"
+              disabled={verifying}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50"
             >
-              <KeyRound className="h-3.5 w-3.5" />
-              Unlock Access
+              {verifying ? (
+                <>
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  <span>Verifying...</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound className="h-3.5 w-3.5" />
+                  <span>Unlock Access</span>
+                </>
+              )}
             </button>
           </div>
         </form>
