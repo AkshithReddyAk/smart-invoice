@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -205,7 +205,8 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       selectedTemplate.mode === 'background' &&
       selectedTemplate.field_mappings.fields.length > 0
   );
-  const [editorMode, setEditorMode] = useState<'direct' | 'split'>('split');
+  const [editorMode, setEditorMode] = useState<'direct' | 'split'>('direct');
+  const userManuallyChangedMode = useRef(false);
 
   useEffect(() => {
     const next = buildInitialForm(settings, templates, editingInvoice, initialTemplateId);
@@ -221,7 +222,13 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
   }, [editingInvoice?.id, initialTemplateId]);
 
   useEffect(() => {
-    if (!canDirectFill && editorMode === 'direct') {
+    if (!userManuallyChangedMode.current) {
+      if (canDirectFill) {
+        setEditorMode('direct');
+      } else {
+        setEditorMode('split');
+      }
+    } else if (!canDirectFill && editorMode === 'direct') {
       setEditorMode('split');
     }
   }, [selectedTemplate?.id, canDirectFill]);
@@ -640,7 +647,10 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
               <div className="mt-0.5 inline-flex rounded-lg border border-slate-300 bg-slate-100 p-0.5 text-xs font-semibold">
                 <button
                   type="button"
-                  onClick={() => setEditorMode('direct')}
+                  onClick={() => {
+                    userManuallyChangedMode.current = true;
+                    setEditorMode('direct');
+                  }}
                   className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
                     editorMode === 'direct'
                       ? 'bg-indigo-600 text-white shadow-sm'
@@ -651,7 +661,10 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEditorMode('split')}
+                  onClick={() => {
+                    userManuallyChangedMode.current = true;
+                    setEditorMode('split');
+                  }}
                   className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
                     editorMode === 'split'
                       ? 'bg-indigo-600 text-white shadow-sm'
