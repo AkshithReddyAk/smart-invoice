@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Receipt,
+  RefreshCw,
   Settings as SettingsIcon,
   Unlock,
   X,
@@ -77,6 +78,9 @@ export function App() {
     localStorage.removeItem('smart_invoice_auth_session');
     sessionStorage.removeItem('smart_invoice_template_unlocked');
     setIsTemplateUnlocked(false);
+    setSection('create');
+    setEditingInvoice(null);
+    setPreferredTemplateId(null);
     setCurrentUser(null);
   };
 
@@ -246,7 +250,18 @@ export function App() {
   );
 
   if (!currentUser) {
-    return <LoginPage onLoginSuccess={(u) => setCurrentUser(u)} />;
+    return (
+      <LoginPage
+        onLoginSuccess={(u) => {
+          setCurrentUser(u);
+          setSection('create');
+          setEditingInvoice(null);
+          setPreferredTemplateId(null);
+          setEditorResetKey((k) => k + 1);
+          refreshAll();
+        }}
+      />
+    );
   }
 
   return (
@@ -321,28 +336,37 @@ export function App() {
             />
           )}
 
-          {section === 'create' && settings && (
-            <InvoiceEditor
-              key={`${editingInvoice?.id || 'new'}-${preferredTemplateId || 'def'}-${editorResetKey}`}
-              templates={templates}
-              settings={settings}
-              editingInvoice={editingInvoice}
-              initialTemplateId={preferredTemplateId}
-              onOpenTemplateEditor={(tpl) => {
-                checkTemplateAuth(
-                  () => setEditingTemplate(tpl),
-                  'Unlock Edit Fields',
-                  'Please enter the password (Ak@200419) to adjust and edit template fields.'
-                );
-              }}
-              onSaved={() => {
-                refreshAll();
-              }}
-              onNewBlank={() => {
-                setEditingInvoice(null);
-                setEditorResetKey((k) => k + 1);
-              }}
-            />
+          {section === 'create' && (
+            settings ? (
+              <InvoiceEditor
+                key={`${editingInvoice?.id || 'new'}-${preferredTemplateId || 'def'}-${editorResetKey}`}
+                templates={templates}
+                settings={settings}
+                editingInvoice={editingInvoice}
+                initialTemplateId={preferredTemplateId}
+                onOpenTemplateEditor={(tpl) => {
+                  checkTemplateAuth(
+                    () => setEditingTemplate(tpl),
+                    'Unlock Edit Fields',
+                    'Please enter the password (Ak@200419) to adjust and edit template fields.'
+                  );
+                }}
+                onSaved={() => {
+                  refreshAll();
+                }}
+                onNewBlank={() => {
+                  setEditingInvoice(null);
+                  setEditorResetKey((k) => k + 1);
+                }}
+              />
+            ) : (
+              <div className="flex h-96 items-center justify-center">
+                <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-500">
+                  <RefreshCw className="h-5 w-5 animate-spin text-indigo-600" />
+                  <span>Loading Create New Invoice...</span>
+                </div>
+              </div>
+            )
           )}
 
           {section === 'generated' && (
