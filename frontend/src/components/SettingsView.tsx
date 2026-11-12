@@ -81,7 +81,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         new_password: pwForm.newPassword,
         confirm_password: pwForm.confirmPassword,
       });
-      setPwMsg(res.message || 'Password changed successfully!');
+      if (res.token) {
+        try {
+          const raw = localStorage.getItem('smart_invoice_auth_session');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            parsed.token = res.token;
+            localStorage.setItem('smart_invoice_auth_session', JSON.stringify(parsed));
+          }
+        } catch {
+          // ignore session write error
+        }
+      }
+      setPwMsg(res.message || 'Password updated successfully! Old password is now invalidated.');
       setPwForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
       setPwError(err.message || 'Failed to update password');
@@ -358,7 +370,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             )}
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Change your personal login and template password. This new password will be applicable for <strong>+91 {currentUserPhone || 'your account'} only</strong>.
+            Change your personal login password. Once updated, your old password will be <strong>immediately invalidated</strong> and cannot be used to log in for <strong>+91 {currentUserPhone || 'your account'}</strong>.
           </p>
         </div>
 
@@ -387,7 +399,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 type={showOldPw ? 'text' : 'password'}
                 value={pwForm.oldPassword}
                 onChange={(e) => setPwForm({ ...pwForm, oldPassword: e.target.value })}
-                placeholder="Enter your current password"
+                placeholder="Enter current password (e.g. Ak@2004 or Ak@200419)"
                 className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
               <button

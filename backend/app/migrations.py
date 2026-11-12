@@ -31,13 +31,11 @@ def run_migrations() -> None:
         if not settings:
             db.add(CompanySettings(id=1, company_name="My Company"))
 
-        # Ensure default authorized users exist and update login password to Ak@2004
+        # Ensure default authorized users exist if not already present
         for phone, (role, default_pass) in DEFAULT_USERS.items():
             user = db.query(UserCredential).filter(UserCredential.phone == phone).first()
             if not user:
                 db.add(UserCredential(phone=phone, password=default_pass, role=role))
-            else:
-                user.password = default_pass
 
         db.commit()
 

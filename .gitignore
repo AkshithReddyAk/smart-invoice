@@ -14,3 +14,4 @@ __pycache__/
 .DS_Store
 .env
 .env.local
+_tmp_test_env/

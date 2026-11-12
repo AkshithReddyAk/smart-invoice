@@ -52,11 +52,14 @@ export const api = {
     new_password: string;
     confirm_password: string;
   }) =>
-    request<{ status: string; message: string }>('/api/auth/change-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    }),
+    request<{ status: string; message: string; token?: string; phone?: string }>(
+      '/api/auth/change-password',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }
+    ),
   verifyPassword: (phone: string, password: string) =>
     request<{ status: string; valid: boolean }>('/api/auth/verify-password', {
       method: 'POST',

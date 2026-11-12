@@ -125,7 +125,12 @@ def change_password(payload: ChangePasswordRequest, db: Session = Depends(get_db
 
     # 1. Verify old password
     old_pw = (payload.old_password or "").strip()
-    if user.password != old_pw:
+    # Accept current stored password, or initial Ak@200419 / Ak@2004 if default
+    is_valid_old = (
+        old_pw == user.password
+        or (user.password in ("Ak@2004", "Ak@200419") and old_pw in ("Ak@2004", "Ak@200419"))
+    )
+    if not is_valid_old:
         raise HTTPException(
             status_code=400,
             detail="Current password is incorrect.",
@@ -157,9 +162,24 @@ def change_password(payload: ChangePasswordRequest, db: Session = Depends(get_db
     user.password = new_pw
     db.commit()
 
+    # 4. Invalidate all previous active sessions for this phone number
+    tokens_to_remove = [t for t, sess in ACTIVE_SESSIONS.items() if sess.get("phone") == phone]
+    for t in tokens_to_remove:
+        ACTIVE_SESSIONS.pop(t, None)
+
+    # 5. Issue a new active session token so the current user stays authenticated
+    new_token = secrets.token_hex(24)
+    ACTIVE_SESSIONS[new_token] = {
+        "phone": phone,
+        "role": user.role,
+        "created_at": time.time(),
+    }
+
     return {
         "status": "ok",
-        "message": f"Password successfully updated for user +91 {phone}. Your new password is now active.",
+        "token": new_token,
+        "phone": phone,
+        "message": f"Password successfully updated for user +91 {phone}! The old password has been invalidated and cannot be used to log in.",
     }
 
 
