@@ -10,6 +10,7 @@ import {
   FilePlus2,
   FileText,
   LayoutPanelLeft,
+  Lock,
   Plus,
   Printer,
   RefreshCw,
@@ -606,10 +607,12 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenTemplateEditor(selectedTemplate)}
-                  title="Adjust mapped fields on this template"
-                  className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  title="Adjust mapped fields on this template (Protected)"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                 >
-                  <Sliders className="h-3.5 w-3.5" /> Adjust Fields
+                  <Sliders className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Adjust Fields</span>
+                  <Lock className="h-3 w-3 text-amber-500" />
                 </button>
               )}
             </div>
@@ -802,9 +805,12 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                         <button
                           type="button"
                           onClick={() => onOpenTemplateEditor(selectedTemplate)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          title="Edit template fields (Protected)"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                         >
-                          <Sliders className="h-3.5 w-3.5" /> Edit Fields
+                          <Sliders className="h-3.5 w-3.5 text-slate-500" />
+                          <span>Edit Fields</span>
+                          <Lock className="h-3 w-3 text-amber-500" />
                         </button>
                       </div>
 

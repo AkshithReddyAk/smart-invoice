@@ -5,15 +5,18 @@ import {
   History,
   LayoutDashboard,
   LayoutTemplate,
+  Lock,
   Menu,
   Receipt,
   Settings as SettingsIcon,
+  Unlock,
   X,
 } from 'lucide-react';
 import { api } from './api';
 import { DashboardView } from './components/DashboardView';
 import { InvoiceEditor } from './components/InvoiceEditor';
 import { InvoicesListView } from './components/InvoicesListView';
+import { PasswordModal } from './components/PasswordModal';
 import { SettingsView } from './components/SettingsView';
 import { TemplateEditorModal } from './components/TemplateEditorModal';
 import { TemplatesView } from './components/TemplatesView';
@@ -45,6 +48,44 @@ export function App() {
   const [preferredTemplateId, setPreferredTemplateId] = useState<string | null>(null);
   const [editorResetKey, setEditorResetKey] = useState(0);
   const [bootError, setBootError] = useState('');
+  const [isTemplateUnlocked, setIsTemplateUnlocked] = useState<boolean>(() => {
+    return sessionStorage.getItem('smart_invoice_template_unlocked') === 'true';
+  });
+  const [passwordModal, setPasswordModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    action: () => void;
+  } | null>(null);
+
+  const checkTemplateAuth = (
+    action: () => void,
+    title = 'Admin Password Required',
+    description = 'Enter the password to access invoice templates and editing.'
+  ) => {
+    if (sessionStorage.getItem('smart_invoice_template_unlocked') === 'true') {
+      setIsTemplateUnlocked(true);
+      action();
+    } else {
+      setPasswordModal({
+        isOpen: true,
+        title,
+        description,
+        action: () => {
+          setIsTemplateUnlocked(true);
+          action();
+        },
+      });
+    }
+  };
+
+  const lockTemplates = () => {
+    sessionStorage.removeItem('smart_invoice_template_unlocked');
+    setIsTemplateUnlocked(false);
+    if (section === 'templates') {
+      setSection('create');
+    }
+  };
 
   const refreshAll = async () => {
     try {
@@ -78,6 +119,17 @@ export function App() {
   };
 
   const navigate = (sec: NavSection) => {
+    if (sec === 'templates') {
+      checkTemplateAuth(
+        () => {
+          setSection('templates');
+          setMobileOpen(false);
+        },
+        'Access Invoice Templates',
+        'Please enter the password (Ak@200419) to view and manage invoice templates.'
+      );
+      return;
+    }
     if (sec === 'create' && section !== 'create') {
       // Starting fresh when clicking Create New Invoice from nav
       setEditingInvoice(null);
@@ -103,18 +155,39 @@ export function App() {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = section === item.id;
+          const isLockedTemplate = item.id === 'templates' && !isTemplateUnlocked;
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 active
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span>{item.label}</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </div>
+              {item.id === 'templates' && (
+                isLockedTemplate ? (
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                    <Lock className="h-2.5 w-2.5" /> PIN
+                  </span>
+                ) : (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      lockTemplates();
+                    }}
+                    title="Click to lock templates"
+                    className="inline-flex items-center gap-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-500/30 cursor-pointer"
+                  >
+                    <Unlock className="h-2.5 w-2.5" /> Lock
+                  </span>
+                )
+              )}
             </button>
           );
         })}
@@ -176,7 +249,13 @@ export function App() {
             <TemplatesView
               templates={templates}
               onRefresh={refreshAll}
-              onEditTemplate={(tpl) => setEditingTemplate(tpl)}
+              onEditTemplate={(tpl) => {
+                checkTemplateAuth(
+                  () => setEditingTemplate(tpl),
+                  'Unlock Edit Fields',
+                  'Please enter the password (Ak@200419) to adjust and edit template fields.'
+                );
+              }}
               onUseTemplate={(tpl) => {
                 setEditingInvoice(null);
                 setPreferredTemplateId(tpl.id);
@@ -193,7 +272,13 @@ export function App() {
               settings={settings}
               editingInvoice={editingInvoice}
               initialTemplateId={preferredTemplateId}
-              onOpenTemplateEditor={(tpl) => setEditingTemplate(tpl)}
+              onOpenTemplateEditor={(tpl) => {
+                checkTemplateAuth(
+                  () => setEditingTemplate(tpl),
+                  'Unlock Edit Fields',
+                  'Please enter the password (Ak@200419) to adjust and edit template fields.'
+                );
+              }}
               onSaved={() => {
                 refreshAll();
               }}
@@ -250,6 +335,19 @@ export function App() {
             setEditingTemplate(null);
             await refreshAll();
           }}
+        />
+      )}
+
+      {passwordModal?.isOpen && (
+        <PasswordModal
+          title={passwordModal.title}
+          description={passwordModal.description}
+          onSuccess={() => {
+            const act = passwordModal.action;
+            setPasswordModal(null);
+            act();
+          }}
+          onClose={() => setPasswordModal(null)}
         />
       )}
     </div>
