@@ -19,12 +19,6 @@ interface LoginPageProps {
   onLoginSuccess: (user: { phone: string; token: string; role: string }) => void;
 }
 
-const AUTHORIZED_LIST = [
-  { phone: '9553057496', label: 'Primary Admin' },
-  { phone: '9908599043', label: 'Billing Counter' },
-  { phone: '9951404366', label: 'Operations & Sales' },
-];
-
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
@@ -200,34 +194,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                       className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pl-20 pr-4 text-sm font-semibold text-white placeholder-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
                     />
                   </div>
-                </div>
-
-                {/* Quick Select Buttons for Authorized Numbers */}
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="font-medium">Authorized staff numbers:</span>
-                    <span className="text-[10px] text-indigo-400">Click to fill</span>
-                  </div>
-                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-                    {AUTHORIZED_LIST.map((item) => (
-                      <button
-                        type="button"
-                        key={item.phone}
-                        onClick={() => {
-                          setPhone(item.phone);
-                          setError('');
-                        }}
-                        className={`rounded-lg border px-2.5 py-1.5 text-left text-[11px] font-medium transition ${
-                          phone.includes(item.phone)
-                            ? 'border-indigo-500 bg-indigo-600/30 text-indigo-200'
-                            : 'border-slate-700 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
-                        }`}
-                      >
-                        <div className="font-semibold text-white">{item.phone}</div>
-                        <div className="text-[9px] text-slate-400 truncate">{item.label}</div>
-                      </button>
-                    ))}
-                  </div>
+                  <p className="mt-2 text-[11px] text-slate-400">
+                    Only authorized numbers will receive a one-time login OTP.
+                  </p>
                 </div>
 
                 <button

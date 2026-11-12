@@ -40,15 +40,6 @@ class VerifyOtpRequest(BaseModel):
     otp: str
 
 
-@router.get("/authorized-numbers")
-def get_authorized_numbers():
-    """Return masked or public authorized numbers for reference."""
-    return {
-        "authorized_count": len(AUTHORIZED_NUMBERS),
-        "numbers": [f"+91 {n[:2]}******{n[-2:]}" for n in AUTHORIZED_NUMBERS.keys()],
-    }
-
-
 @router.post("/send-otp")
 def send_otp(payload: SendOtpRequest):
     phone = normalize_phone(payload.phone)
