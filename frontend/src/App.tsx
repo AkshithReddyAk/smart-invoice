@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Lock,
+  LogOut,
   Menu,
   Receipt,
   Settings as SettingsIcon,
@@ -16,6 +17,7 @@ import { api } from './api';
 import { DashboardView } from './components/DashboardView';
 import { InvoiceEditor } from './components/InvoiceEditor';
 import { InvoicesListView } from './components/InvoicesListView';
+import { LoginPage } from './components/LoginPage';
 import { PasswordModal } from './components/PasswordModal';
 import { SettingsView } from './components/SettingsView';
 import { TemplateEditorModal } from './components/TemplateEditorModal';
@@ -38,6 +40,19 @@ const NAV_ITEMS: Array<{ id: NavSection; label: string; icon: React.ComponentTyp
 ];
 
 export function App() {
+  const [currentUser, setCurrentUser] = useState<{
+    phone: string;
+    token: string;
+    role: string;
+  } | null>(() => {
+    try {
+      const raw = localStorage.getItem('smart_invoice_auth_session');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [section, setSection] = useState<NavSection>('create');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -57,6 +72,13 @@ export function App() {
     description: string;
     action: () => void;
   } | null>(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem('smart_invoice_auth_session');
+    sessionStorage.removeItem('smart_invoice_template_unlocked');
+    setIsTemplateUnlocked(false);
+    setCurrentUser(null);
+  };
 
   const checkTemplateAuth = (
     action: () => void,
@@ -193,12 +215,39 @@ export function App() {
         })}
       </nav>
 
-      <div className="border-t border-slate-800 p-4 text-xs text-slate-400">
-        <div>Saved Templates: {templates.length}</div>
-        <div>Generated Invoices: {stats?.total_invoices ?? 0}</div>
+      <div className="border-t border-slate-800 p-3 text-xs text-slate-400 space-y-2">
+        <div className="flex items-center justify-between text-[11px] px-1">
+          <span>Templates: {templates.length}</span>
+          <span>Invoices: {stats?.total_invoices ?? 0}</span>
+        </div>
+
+        {/* User Session Info & Logout Button */}
+        {currentUser && (
+          <div className="flex items-center justify-between rounded-xl bg-slate-800/80 p-2.5 border border-slate-700/60 shadow-sm">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Authorized
+              </div>
+              <div className="text-xs font-semibold text-white truncate">+91 {currentUser.phone}</div>
+              <div className="text-[10px] text-slate-400 truncate">{currentUser.role}</div>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Log out from SmartInvoice"
+              className="ml-2 rounded-lg p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 transition"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
+
+  if (!currentUser) {
+    return <LoginPage onLoginSuccess={(u) => setCurrentUser(u)} />;
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -227,7 +276,14 @@ export function App() {
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <span className="text-sm font-bold text-slate-900">SmartInvoice Studio</span>
-          <div className="w-8" />
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Logout</span>
+          </button>
         </header>
 
         {bootError && (

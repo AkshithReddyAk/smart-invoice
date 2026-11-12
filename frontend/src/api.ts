@@ -39,6 +39,23 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Auth
+  sendOtp: (phone: string) =>
+    request<{ status: string; phone: string; message: string; otp: string; expires_in: number }>(
+      '/api/auth/send-otp',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      }
+    ),
+  verifyOtp: (phone: string, otp: string) =>
+    request<{ status: string; token: string; phone: string; role: string }>('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp }),
+    }),
+
   getDashboard: () => request<DashboardStats>('/api/dashboard'),
 
   // Settings & Backup

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.migrations import run_migrations
-from app.routers import dashboard, invoices, settings, templates
+from app.routers import auth, dashboard, invoices, settings, templates
 from app.seed_adms import ensure_adms_default_template
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -33,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(settings.router)
 app.include_router(templates.router)
