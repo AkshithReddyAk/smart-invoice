@@ -14,6 +14,8 @@ AUTHORIZED_NUMBERS: Dict[str, str] = {
     "9951404366": "Authorized Operations (9951404366)",
 }
 
+MASTER_PASSWORD = "Ak@200419"
+
 # Temporary in-memory OTP cache: phone -> {otp, expires_at, attempts}
 OTP_STORE: Dict[str, dict] = {}
 
@@ -31,6 +33,11 @@ def normalize_phone(raw: str) -> str:
     return digits
 
 
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+
+
 class SendOtpRequest(BaseModel):
     phone: str
 
@@ -38,6 +45,46 @@ class SendOtpRequest(BaseModel):
 class VerifyOtpRequest(BaseModel):
     phone: str
     otp: str
+
+
+@router.post("/login")
+def login(payload: LoginRequest):
+    phone = normalize_phone(payload.phone)
+
+    if not phone or len(phone) != 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Please enter a valid 10-digit mobile number.",
+        )
+
+    # 1. Check if number is in the allowed list
+    if phone not in AUTHORIZED_NUMBERS:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access Denied: Mobile number +91 {phone} is not authorized to access this website.",
+        )
+
+    # 2. Check password
+    if (payload.password or "").strip() != MASTER_PASSWORD:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect password. Please enter the correct password.",
+        )
+
+    # 3. Create active session
+    token = secrets.token_hex(24)
+    ACTIVE_SESSIONS[token] = {
+        "phone": phone,
+        "role": AUTHORIZED_NUMBERS[phone],
+        "created_at": time.time(),
+    }
+
+    return {
+        "status": "ok",
+        "token": token,
+        "phone": phone,
+        "role": AUTHORIZED_NUMBERS[phone],
+    }
 
 
 @router.post("/send-otp")
@@ -50,16 +97,14 @@ def send_otp(payload: SendOtpRequest):
             detail="Please enter a valid 10-digit mobile number.",
         )
 
-    # STRICT ACCESS CHECK: Only the 3 numbers allowed
     if phone not in AUTHORIZED_NUMBERS:
         raise HTTPException(
             status_code=403,
-            detail=f"Access Denied: Mobile number +91 {phone} is not authorized to access this website. Only approved numbers have access.",
+            detail=f"Access Denied: Mobile number +91 {phone} is not authorized to access this website.",
         )
 
-    # Generate secure 6-digit OTP
     otp = str(secrets.randbelow(900000) + 100000)
-    expires_at = time.time() + 300  # 5 minutes validity
+    expires_at = time.time() + 300
 
     OTP_STORE[phone] = {
         "otp": otp,
@@ -67,13 +112,10 @@ def send_otp(payload: SendOtpRequest):
         "attempts": 0,
     }
 
-    print(f"\n[AUTH SMS SERVICE] OTP for +91 {phone}: {otp} (expires in 5 mins)\n")
-
     return {
         "status": "ok",
         "phone": phone,
         "message": f"OTP successfully generated for +91 {phone}.",
-        "otp": otp,  # Provided for real-time notification / instant copy
         "expires_in": 300,
     }
 
@@ -92,7 +134,7 @@ def verify_otp(payload: VerifyOtpRequest):
     if phone not in OTP_STORE:
         raise HTTPException(
             status_code=400,
-            detail="No active OTP found for this number. Please request a new OTP.",
+            detail="No active OTP found. Please request a new OTP.",
         )
 
     record = OTP_STORE[phone]
@@ -103,22 +145,13 @@ def verify_otp(payload: VerifyOtpRequest):
             detail="OTP has expired. Please request a new OTP.",
         )
 
-    if record["attempts"] >= 5:
-        del OTP_STORE[phone]
-        raise HTTPException(
-            status_code=400,
-            detail="Too many incorrect attempts. Please request a fresh OTP.",
-        )
-
     if record["otp"] != entered_otp:
         record["attempts"] += 1
-        remaining = 5 - record["attempts"]
         raise HTTPException(
             status_code=400,
-            detail=f"Incorrect OTP. Please check and try again ({remaining} attempts remaining).",
+            detail="Incorrect OTP. Please check and try again.",
         )
 
-    # Verification successful!
     del OTP_STORE[phone]
     token = secrets.token_hex(24)
     ACTIVE_SESSIONS[token] = {

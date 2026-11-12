@@ -40,6 +40,12 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   // Auth
+  login: (phone: string, password: string) =>
+    request<{ status: string; token: string; phone: string; role: string }>('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, password }),
+    }),
   sendOtp: (phone: string) =>
     request<{ status: string; phone: string; message: string; otp: string; expires_in: number }>(
       '/api/auth/send-otp',
