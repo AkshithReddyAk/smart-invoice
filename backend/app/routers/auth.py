@@ -17,7 +17,8 @@ AUTHORIZED_NUMBERS: Dict[str, str] = {
     "9951404366": "Authorized Operations (9951404366)",
 }
 
-DEFAULT_MASTER_PASSWORD = "Ak@200419"
+DEFAULT_LOGIN_PASSWORD = "Ak@2004"
+TEMPLATE_UNLOCK_PASSWORD = "Ak@200419"
 
 OTP_STORE: Dict[str, dict] = {}
 ACTIVE_SESSIONS: Dict[str, dict] = {}
@@ -63,7 +64,7 @@ def get_or_create_user(phone: str, db: Session) -> UserCredential:
     user = db.query(UserCredential).filter(UserCredential.phone == phone).first()
     if not user:
         role = AUTHORIZED_NUMBERS.get(phone, "Authorized Staff")
-        user = UserCredential(phone=phone, password=DEFAULT_MASTER_PASSWORD, role=role)
+        user = UserCredential(phone=phone, password=DEFAULT_LOGIN_PASSWORD, role=role)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -163,20 +164,13 @@ def change_password(payload: ChangePasswordRequest, db: Session = Depends(get_db
 
 
 @router.post("/verify-password")
-def verify_password(payload: VerifyPasswordRequest, db: Session = Depends(get_db)):
-    phone = normalize_phone(payload.phone)
-
-    if not phone or phone not in AUTHORIZED_NUMBERS:
-        raise HTTPException(
-            status_code=403,
-            detail="Unauthorized user.",
-        )
-
-    user = get_or_create_user(phone, db)
-    if user.password != (payload.password or "").strip():
+def verify_password(payload: VerifyPasswordRequest):
+    """Verify password for unlocking invoice templates and field editors."""
+    entered = (payload.password or "").strip()
+    if entered != TEMPLATE_UNLOCK_PASSWORD:
         raise HTTPException(
             status_code=400,
-            detail="Incorrect password. Please try again.",
+            detail="Incorrect invoice template password. Please try again.",
         )
 
     return {"status": "ok", "valid": True}

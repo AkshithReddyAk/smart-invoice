@@ -3,15 +3,16 @@ from app.database import Base, SessionLocal, engine
 from app.models import CompanySettings, SchemaMigration, UserCredential
 
 DEFAULT_USERS = {
-    "9553057496": ("Authorized Admin (9553057496)", "Ak@200419"),
-    "9908599043": ("Authorized Billing (9908599043)", "Ak@200419"),
-    "9951404366": ("Authorized Operations (9951404366)", "Ak@200419"),
+    "9553057496": ("Authorized Admin (9553057496)", "Ak@2004"),
+    "9908599043": ("Authorized Billing (9908599043)", "Ak@2004"),
+    "9951404366": ("Authorized Operations (9951404366)", "Ak@2004"),
 }
 
 
 MIGRATIONS = [
     ("001_initial_schema", "Create core tables for settings, templates, invoices, and invoice_items"),
     ("002_user_credentials", "Create user credentials table with per-user passwords"),
+    ("003_update_login_passwords", "Set default login password for the 3 authorized numbers to Ak@2004"),
 ]
 
 
@@ -30,11 +31,13 @@ def run_migrations() -> None:
         if not settings:
             db.add(CompanySettings(id=1, company_name="My Company"))
 
-        # Ensure default authorized users exist
+        # Ensure default authorized users exist and update login password to Ak@2004
         for phone, (role, default_pass) in DEFAULT_USERS.items():
             user = db.query(UserCredential).filter(UserCredential.phone == phone).first()
             if not user:
                 db.add(UserCredential(phone=phone, password=default_pass, role=role))
+            else:
+                user.password = default_pass
 
         db.commit()
 
