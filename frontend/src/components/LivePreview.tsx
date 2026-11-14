@@ -258,6 +258,11 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
 
               {/* Mapped Single Fields */}
               {pageFields.map((fld) => {
+                const isDateField =
+                  fld.field_key === 'date' ||
+                  fld.field_key === 'invoice_date' ||
+                  fld.field_key === 'display_date';
+                const fieldWidthPct = isDateField && fld.w_pct < 13 ? 13.2 : fld.w_pct;
                 const val = valueMap[fld.field_key] ?? '';
                 const isActive = activeFieldKey === fld.field_key;
                 return (
@@ -267,12 +272,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                       position: 'absolute',
                       left: `${fld.x_pct}%`,
                       top: `${fld.y_pct}%`,
-                      width: `${fld.w_pct}%`,
+                      width: `${fieldWidthPct}%`,
                       height: `${fld.h_pct}%`,
+                      boxSizing: 'border-box',
                       backgroundColor:
                         fld.bg_color || (isActive ? 'rgba(79, 70, 229, 0.14)' : 'transparent'),
                       outline: isActive ? '2px solid #4f46e5' : 'none',
-                      fontSize: `${Math.max(6, fld.font_size * ptToPx)}px`,
+                      fontSize: `${Math.max(5.5, fld.font_size * ptToPx)}px`,
                       fontWeight: fld.font_weight,
                       color: fld.color || '#111827',
                       textAlign: fld.align,
@@ -284,9 +290,10 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                           : fld.align === 'right'
                           ? 'flex-end'
                           : 'flex-start',
-                      padding: '1px 3px',
-                      lineHeight: 1.2,
+                      padding: '0 2px',
+                      lineHeight: 1.15,
                       overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                       whiteSpace: fld.multiline ? 'pre-wrap' : 'nowrap',
                       wordBreak: 'break-word',
                     }}

@@ -67,7 +67,7 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(820);
-  const [mobileZoom, setMobileZoom] = useState<'fit' | 'zoom'>('fit');
+  const [mobileZoom, setMobileZoom] = useState<'fit' | '1.4x' | '2x'>('fit');
 
   useEffect(() => {
     const el = containerRef.current;
@@ -90,11 +90,14 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
 
   const getFieldDisplayValue = (fld: FieldOverlay): string => {
     const k = fld.field_key;
+    if (k === 'date' || k === 'invoice_date' || k === 'display_date') {
+      if (k in form.extra_fields && form.extra_fields[k]) {
+        return isoToDmy(form.extra_fields[k]);
+      }
+      return isoToDmy(form.invoice_date);
+    }
     if (k in form.extra_fields) {
       return form.extra_fields[k];
-    }
-    if (k === 'display_date') {
-      return isoToDmy(form.invoice_date);
     }
     if (STANDARD_BINDINGS.has(k)) {
       if (k === 'shipping_address') return form.shipping_address;
@@ -123,12 +126,12 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
       // 1. Apply value to standard field or extra_fields
       if (k === 'invoice_number' || k === 'invoice_no') {
         next.invoice_number = rawVal;
-      } else if (k === 'display_date') {
+      } else if (k === 'date' || k === 'display_date' || k === 'invoice_date') {
+        next.extra_fields.date = rawVal;
         next.extra_fields.display_date = rawVal;
+        next.extra_fields.invoice_date = rawVal;
         const iso = normalizeDisplayDateToIso(rawVal);
         if (iso) next.invoice_date = iso;
-      } else if (k === 'invoice_date') {
-        next.invoice_date = rawVal;
       } else if (k === 'due_date') {
         next.due_date = rawVal;
       } else if (k === 'po_number') {
@@ -268,7 +271,7 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-2 mb-2 sm:hidden px-1">
-        <span className="text-[11px] text-slate-500 font-medium">Canvas Mode:</span>
+        <span className="text-[11px] text-slate-500 font-medium">Canvas View:</span>
         <div className="inline-flex rounded-lg bg-slate-200 p-0.5 text-xs font-semibold">
           <button
             type="button"
@@ -281,12 +284,21 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setMobileZoom('zoom')}
+            onClick={() => setMobileZoom('1.4x')}
             className={`px-2.5 py-1 rounded-md transition touch-manipulation ${
-              mobileZoom === 'zoom' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+              mobileZoom === '1.4x' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
             }`}
           >
-            Zoom to Type 🔍
+            1.4x 🔍
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileZoom('2x')}
+            className={`px-2.5 py-1 rounded-md transition touch-manipulation ${
+              mobileZoom === '2x' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+            }`}
+          >
+            2.0x 🔍
           </button>
         </div>
       </div>
@@ -294,8 +306,12 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
       <div className="overflow-x-auto mobile-scroll pb-2">
         <div
           ref={containerRef}
-          className={`mx-auto space-y-6 ${
-            mobileZoom === 'zoom' ? 'w-[720px] max-w-none' : 'w-full max-w-[880px]'
+          className={`mx-auto space-y-6 transition-all duration-150 ${
+            mobileZoom === '2x'
+              ? 'w-[820px] max-w-none'
+              : mobileZoom === '1.4x'
+              ? 'w-[580px] max-w-none'
+              : 'w-full max-w-[880px]'
           }`}
         >
           {pages.map((pg) => {
@@ -333,20 +349,33 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
             {/* Directly Editable Blank Inputs */}
             {pageFields.map((fld) => {
               const val = getFieldDisplayValue(fld);
-              const pxFont = Math.max(7, Number((fld.font_size * ptToPx).toFixed(1)));
+              const isDateField =
+                fld.field_key === 'date' ||
+                fld.field_key === 'invoice_date' ||
+                fld.field_key === 'display_date';
+              const fieldWidthPct = isDateField && fld.w_pct < 13 ? 13.2 : fld.w_pct;
+              const pxFont = Math.max(5.5, Number((fld.font_size * ptToPx).toFixed(1)));
 
               const sharedStyle: React.CSSProperties = {
                 position: 'absolute',
                 left: `${fld.x_pct}%`,
                 top: `${fld.y_pct}%`,
-                width: `${fld.w_pct}%`,
+                width: `${fieldWidthPct}%`,
                 height: `${fld.h_pct}%`,
+                maxHeight: `${fld.h_pct}%`,
+                minHeight: 0,
+                boxSizing: 'border-box',
                 fontSize: `${pxFont}px`,
                 fontWeight: fld.font_weight === 'bold' ? 700 : 400,
                 color: fld.color || '#111827',
                 textAlign: fld.align,
-                backgroundColor: fld.bg_color || 'rgba(238, 242, 255, 0.35)',
-                lineHeight: 1.2,
+                backgroundColor: fld.bg_color || 'rgba(238, 242, 255, 0.45)',
+                lineHeight: 1.15,
+                margin: 0,
+                padding: '0 2px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: fld.multiline ? 'pre-wrap' : 'nowrap',
               };
 
               if (fld.kind === 'image' || fld.field_key === 'company_logo') {
@@ -362,7 +391,7 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
                     placeholder={fld.label}
                     title={fld.label}
                     style={sharedStyle}
-                    className="resize-none rounded-sm border border-transparent px-1 py-0.5 placeholder:text-[10px] placeholder:font-normal placeholder:text-indigo-400/70 hover:border-indigo-300 focus:border-indigo-600 focus:bg-white/95 focus:outline-none"
+                    className="resize-none rounded-none border border-transparent hover:border-indigo-300 focus:border-indigo-600 focus:bg-white focus:ring-1 focus:ring-indigo-500/50 focus:z-20 focus:outline-none transition-colors"
                   />
                 );
               }
@@ -372,11 +401,23 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
                   key={fld.id}
                   type="text"
                   value={val}
-                  onChange={(e) => handleFieldChange(fld, e.target.value)}
-                  placeholder={fld.label}
+                  onChange={(e) => {
+                    let text = e.target.value;
+                    if (isDateField) {
+                      const clean = text.replace(/[^\d/]/g, '');
+                      if (clean.length === 8 && !clean.includes('/')) {
+                        text = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`;
+                      } else {
+                        text = clean;
+                      }
+                    }
+                    handleFieldChange(fld, text);
+                  }}
+                  placeholder={isDateField ? 'DD/MM/YYYY' : fld.label}
                   title={fld.label}
+                  maxLength={isDateField ? 10 : undefined}
                   style={sharedStyle}
-                  className="rounded-sm border border-transparent px-1 placeholder:text-[10px] placeholder:font-normal placeholder:text-indigo-400/70 hover:border-indigo-300 focus:border-indigo-600 focus:bg-white/95 focus:outline-none"
+                  className="rounded-none border border-transparent hover:border-indigo-300 focus:border-indigo-600 focus:bg-white focus:ring-1 focus:ring-indigo-500/50 focus:z-20 focus:outline-none transition-colors"
                 />
               );
             })}

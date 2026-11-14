@@ -83,9 +83,9 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
         # Invoice
         "invoice_number": str(invoice_dict.get("invoice_number", "")),
         "invoice_no": str(invoice_dict.get("invoice_number", "")),
-        "invoice_date": inv_date_str,
-        "display_date": display_date,
-        "date": inv_date_str,
+        "invoice_date": display_date or inv_date_str,
+        "display_date": display_date or inv_date_str,
+        "date": display_date or inv_date_str,
         "due_date": str(invoice_dict.get("due_date", "")),
         "place_of_supply": str(invoice_dict.get("place_of_supply", "")),
         "payment_terms": str(invoice_dict.get("payment_terms", "")),
@@ -396,7 +396,10 @@ def generate_background_mode_pdf(
             continue
         op_idx, drect = rendered_pages[p_idx]
         op = out_doc[op_idx]
-        frect = pct_rect(drect, fld["x_pct"], fld["y_pct"], fld["w_pct"], fld["h_pct"])
+        fld_w_pct = fld["w_pct"]
+        if str(fld.get("field_key", "")).lower() in ("date", "invoice_date", "display_date") and fld_w_pct < 13.0:
+            fld_w_pct = 13.2
+        frect = pct_rect(drect, fld["x_pct"], fld["y_pct"], fld_w_pct, fld["h_pct"])
 
         bg = fld.get("bg_color", "")
         if bg:

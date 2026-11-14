@@ -148,6 +148,16 @@ export function calculateInvoice(
   };
 }
 
+export function formatDisplayDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const trimmed = dateStr.trim();
+  const dmy = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmed);
+  if (dmy) return trimmed;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  return trimmed;
+}
+
 export function buildPreviewValueMap(form: InvoiceFormState, calc: CalculatedTotals): Record<string, string> {
   const fmt = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -155,6 +165,8 @@ export function buildPreviewValueMap(form: InvoiceFormState, calc: CalculatedTot
   const words = form.amount_in_words_manual && form.amount_in_words.trim()
     ? form.amount_in_words
     : calc.amount_in_words;
+
+  const formattedDate = formatDisplayDate(form.invoice_date);
 
   return {
     company_name: c.company_name || '',
@@ -168,9 +180,10 @@ export function buildPreviewValueMap(form: InvoiceFormState, calc: CalculatedTot
     company_website: c.website || '',
     invoice_number: form.invoice_number || '',
     invoice_no: form.invoice_number || '',
-    invoice_date: form.invoice_date || '',
-    date: form.invoice_date || '',
-    due_date: form.due_date || '',
+    invoice_date: formattedDate,
+    date: formattedDate,
+    display_date: formattedDate,
+    due_date: formatDisplayDate(form.due_date),
     place_of_supply: form.place_of_supply || '',
     payment_terms: form.payment_terms || '',
     po_number: form.po_number || '',
