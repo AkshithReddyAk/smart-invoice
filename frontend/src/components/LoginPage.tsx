@@ -111,13 +111,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   Authorized Mobile Number
                 </label>
                 <div className="relative flex items-center">
-                  <div className="absolute left-3 flex items-center gap-1 text-xs font-bold text-slate-400 border-r border-slate-600 pr-2">
-                    <span>🇮🇳</span>
-                    <span>+91</span>
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 text-xs font-bold text-slate-300 border-r border-slate-700 select-none z-10">
+                    <span className="mr-1 text-sm leading-none">🇮🇳</span>
+                    <span className="tracking-tight text-slate-200">+91</span>
                   </div>
                   <input
                     ref={phoneInputRef}
                     type="tel"
+                    inputMode="numeric"
                     value={phone}
                     onChange={(e) => {
                       setPhone(e.target.value);
@@ -125,7 +126,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     }}
                     placeholder="Enter 10-digit number"
                     maxLength={14}
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pl-18 sm:pl-20 pr-3 sm:pr-4 text-sm font-semibold text-white placeholder-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
+                    style={{ paddingLeft: '78px' }}
+                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pr-3 sm:pr-4 text-sm font-semibold text-white placeholder:text-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
                   />
                 </div>
               </div>
@@ -136,7 +138,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   Access Password
                 </label>
                 <div className="relative flex items-center">
-                  <div className="absolute left-3.5 flex items-center text-slate-400">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 select-none z-10">
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -148,7 +150,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                       if (error) setError('');
                     }}
                     placeholder="Enter password"
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pl-10 pr-11 text-sm font-semibold text-white placeholder-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
+                    style={{ paddingLeft: '40px' }}
+                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pr-11 text-sm font-semibold text-white placeholder:text-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
                   />
                   <button
                     type="button"
