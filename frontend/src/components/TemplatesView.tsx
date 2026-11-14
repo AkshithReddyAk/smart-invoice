@@ -80,17 +80,17 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-5 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Invoice Templates</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">My Invoice Templates</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
           Upload your existing PDF, DOCX, PNG, or JPG invoice template once. Map editable fields visually and reuse forever.
         </p>
       </div>
 
       {/* Upload Box */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-12">
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
+        <div className="grid grid-cols-1 items-end gap-3 sm:gap-4 md:grid-cols-12">
           <div className="md:col-span-4">
             <label className="text-xs font-semibold uppercase text-slate-600">
               Template Name (Optional)
@@ -99,11 +99,11 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. ADMS Tax Invoice"
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none touch-manipulation"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="flex items-center gap-2 pb-2 text-sm font-medium text-slate-700">
+            <label className="flex items-center gap-2 pb-1 sm:pb-2 text-xs sm:text-sm font-medium text-slate-700 touch-manipulation">
               <input
                 type="checkbox"
                 checked={setAsDefault}
@@ -128,10 +128,10 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 touch-manipulation"
             >
-              <Upload className="h-4 w-4" />
-              {uploading ? 'Processing Template...' : 'Upload Template (PDF, DOCX, PNG, JPG)'}
+              <Upload className="h-4 w-4 shrink-0" />
+              <span className="truncate">{uploading ? 'Processing Template...' : 'Upload Template (PDF, DOCX, PNG, JPG)'}</span>
             </button>
           </div>
         </div>
@@ -155,11 +155,11 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
 
       {/* Saved Templates Grid */}
       {templates.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-12 text-center text-sm text-slate-500">
+        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-8 sm:p-12 text-center text-xs sm:text-sm text-slate-500">
           No templates saved yet. Upload your first invoice template above.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           {templates.map((tpl) => (
             <div
               key={tpl.id}
@@ -168,7 +168,7 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
               }`}
             >
               {/* Preview Thumbnail */}
-              <div className="relative h-56 overflow-hidden border-b border-slate-200 bg-slate-100">
+              <div className="relative h-48 sm:h-56 overflow-hidden border-b border-slate-200 bg-slate-100">
                 {tpl.mode === 'background' && tpl.preview_images.length > 0 ? (
                   <img
                     src={api.getTemplatePageUrl(tpl.id, 1, tpl.updated_at)}
@@ -177,7 +177,7 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
                   />
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <FileText className="h-12 w-12 text-indigo-500" />
+                    <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-indigo-500" />
                     <div className="mt-2 text-sm font-bold text-slate-800">DOCX Template</div>
                     <div className="mt-1 text-xs text-slate-500">
                       {tpl.docx_placeholders.length} placeholders detected
@@ -198,26 +198,26 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
               </div>
 
               {/* Card Body */}
-              <div className="flex flex-1 flex-col p-4">
+              <div className="flex flex-1 flex-col p-3.5 sm:p-4">
                 {renamingId === tpl.id ? (
                   <div className="flex gap-1.5">
                     <input
                       value={renameVal}
                       onChange={(e) => setRenameVal(e.target.value)}
-                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm touch-manipulation"
                     />
                     <button
                       onClick={() => handleRename(tpl.id)}
-                      className="rounded bg-indigo-600 px-2.5 text-white hover:bg-indigo-700"
+                      className="rounded bg-indigo-600 px-2.5 text-white hover:bg-indigo-700 touch-manipulation"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-bold text-slate-900">{tpl.name}</h3>
-                      <p className="text-xs text-slate-500">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-slate-900 truncate">{tpl.name}</h3>
+                      <p className="text-xs text-slate-500 truncate">
                         {tpl.mode === 'background'
                           ? `${tpl.field_mappings.fields.length} mapped fields · ${tpl.field_mappings.masks.length} masks`
                           : `${tpl.docx_placeholders.length} DOCX placeholders`}
@@ -229,25 +229,25 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
                         setRenamingId(tpl.id);
                         setRenameVal(tpl.name);
                       }}
-                      className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                      className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 touch-manipulation"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                   </div>
                 )}
 
-                <div className="mt-4 flex flex-wrap gap-2 pt-2">
+                <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 pt-1 sm:pt-2">
                   <button
                     onClick={() => onUseTemplate(tpl)}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 touch-manipulation"
                   >
-                    <PlusCircle className="h-3.5 w-3.5" /> Use Template
+                    <PlusCircle className="h-3.5 w-3.5 shrink-0" /> Use Template
                   </button>
                   <button
                     onClick={() => onEditTemplate(tpl)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 touch-manipulation"
                   >
-                    <Sliders className="h-3.5 w-3.5" />{' '}
+                    <Sliders className="h-3.5 w-3.5 shrink-0" />{' '}
                     {tpl.mode === 'docx' ? 'Inspect' : 'Map Fields'}
                   </button>
                 </div>
@@ -256,7 +256,7 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
                   {!tpl.is_default ? (
                     <button
                       onClick={() => api.setDefaultTemplate(tpl.id).then(onRefresh)}
-                      className="font-medium text-indigo-600 hover:underline"
+                      className="font-medium text-indigo-600 hover:underline touch-manipulation"
                     >
                       Set as Default
                     </button>
@@ -270,7 +270,7 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
                         setReplaceTargetId(tpl.id);
                         replaceInputRef.current?.click();
                       }}
-                      className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900"
+                      className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 touch-manipulation"
                     >
                       <RefreshCw className="h-3.5 w-3.5" /> Replace
                     </button>
@@ -280,7 +280,7 @@ export const TemplatesView: React.FC<TemplatesViewProps> = ({
                           api.deleteTemplate(tpl.id).then(onRefresh);
                         }
                       }}
-                      className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                      className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 touch-manipulation"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>

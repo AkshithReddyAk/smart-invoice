@@ -206,6 +206,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       selectedTemplate.field_mappings.fields.length > 0
   );
   const [editorMode, setEditorMode] = useState<'direct' | 'split'>('direct');
+  const [mobileSplitTab, setMobileSplitTab] = useState<'form' | 'preview'>('form');
   const userManuallyChangedMode = useRef(false);
 
   useEffect(() => {
@@ -591,17 +592,17 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
   return (
     <div className="flex h-full flex-col">
       {/* Sticky Top Action Bar */}
-      <div className="no-print sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-5 py-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
+      <div className="no-print sticky top-0 z-20 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-5 sm:py-3 shadow-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="min-w-0 flex-1 sm:flex-initial">
             <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
               Invoice Template
             </label>
-            <div className="mt-0.5 flex items-center gap-2">
+            <div className="mt-0.5 flex items-center gap-1.5 sm:gap-2">
               <select
                 value={form.template_id || ''}
                 onChange={(e) => setForm((p) => ({ ...p, template_id: e.target.value || null }))}
-                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2 sm:px-2.5 py-1.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-500 focus:outline-none touch-manipulation"
               >
                 <option value="">Standard A4 (No Template)</option>
                 {templates.map((t) => (
@@ -615,10 +616,10 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                   type="button"
                   onClick={() => onOpenTemplateEditor(selectedTemplate)}
                   title="Adjust mapped fields on this template (Protected)"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 sm:px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 transition touch-manipulation"
                 >
                   <Sliders className="h-3.5 w-3.5 text-slate-500" />
-                  <span>Adjust Fields</span>
+                  <span className="hidden sm:inline">Adjust Fields</span>
                   <Lock className="h-3 w-3 text-amber-500" />
                 </button>
               )}
@@ -632,7 +633,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
             <select
               value={form.paper_size}
               onChange={(e) => setForm((p) => ({ ...p, paper_size: e.target.value as PaperSize }))}
-              className="mt-0.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800"
+              className="mt-0.5 rounded-lg border border-slate-300 bg-white px-2 sm:px-2.5 py-1.5 text-xs sm:text-sm text-slate-800 touch-manipulation"
             >
               <option value="A4">A4 (Default)</option>
               <option value="TEMPLATE">Original Template Size</option>
@@ -651,13 +652,13 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                     userManuallyChangedMode.current = true;
                     setEditorMode('direct');
                   }}
-                  className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
+                  className={`inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 touch-manipulation ${
                     editorMode === 'direct'
-                      ? 'bg-indigo-600 text-white shadow-sm'
+                      ? 'bg-indigo-600 text-white shadow-xs'
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  <FileEdit className="h-3.5 w-3.5" /> Fill in Blanks
+                  <FileEdit className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Fill in</span> Blanks
                 </button>
                 <button
                   type="button"
@@ -665,9 +666,9 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                     userManuallyChangedMode.current = true;
                     setEditorMode('split');
                   }}
-                  className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
+                  className={`inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 touch-manipulation ${
                     editorMode === 'split'
-                      ? 'bg-indigo-600 text-white shadow-sm'
+                      ? 'bg-indigo-600 text-white shadow-xs'
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
@@ -678,58 +679,62 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 xs:flex xs:flex-wrap items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={onNewBlank}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 touch-manipulation"
           >
-            <FilePlus2 className="h-4 w-4" /> New (Same Template)
+            <FilePlus2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">New</span>
           </button>
           <button
             type="button"
             disabled={saving}
             onClick={() => executeSave('save', false)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 touch-manipulation"
           >
-            <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Invoice'}
+            <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">{saving ? 'Saving...' : 'Save'}</span>
           </button>
           <button
             type="button"
             disabled={saving}
             onClick={() => executeSave('print', false)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 touch-manipulation"
           >
-            <Printer className="h-4 w-4" /> Print
+            <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>Print</span>
           </button>
           {form.id && selectedTemplate?.mode === 'docx' && (
             <a
               href={api.getInvoiceDocxUrl(form.id)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 touch-manipulation"
             >
-              <FileText className="h-4 w-4" /> DOCX
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" /> DOCX
             </a>
           )}
           <button
             type="button"
             disabled={saving}
             onClick={() => executeSave('download', false)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
+            className="col-span-2 xs:col-auto inline-flex items-center justify-center gap-1 rounded-lg bg-indigo-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 disabled:opacity-50 touch-manipulation"
           >
-            <Download className="h-4 w-4" /> Download PDF
+            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">Download PDF</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">
+        <div className="mx-3 sm:mx-5 mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs font-medium text-red-700">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700">
+        <div className="mx-3 sm:mx-5 mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs font-medium text-emerald-700">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{successMsg}</span>
         </div>
@@ -737,22 +742,22 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
 
       {/* Direct Fill-in-the-Blanks Mode OR Split-Screen Form + Preview */}
       {editorMode === 'direct' && selectedTemplate ? (
-        <div className="flex-1 bg-slate-100 px-5 py-4">
-          <div className="mx-auto mb-3 flex max-w-[880px] flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-xs shadow-sm">
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="font-semibold text-indigo-900">
-                Click any shaded blank on the invoice below and type directly:
+        <div className="flex-1 bg-slate-100 p-2 sm:p-4 overflow-x-auto mobile-scroll">
+          <div className="mx-auto mb-3 flex max-w-[880px] flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-xl border border-indigo-200 bg-white p-3 text-xs shadow-xs">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
+              <span className="font-semibold text-indigo-900 w-full sm:w-auto">
+                Click any blank on the invoice below and type:
               </span>
-              <label className="flex items-center gap-1.5 font-medium text-slate-700">
+              <label className="flex items-center gap-1.5 font-medium text-slate-700 touch-manipulation">
                 <input
                   type="checkbox"
                   checked={mirrorShipTo}
                   onChange={(e) => setMirrorShipTo(e.target.checked)}
                   className="rounded text-indigo-600"
                 />
-                Auto-fill Shipped To from Bill To
+                Auto-fill Shipped To
               </label>
-              <label className="flex items-center gap-1.5 font-medium text-slate-700">
+              <label className="flex items-center gap-1.5 font-medium text-slate-700 touch-manipulation">
                 <input
                   type="checkbox"
                   checked={autoCalcGst5}
@@ -765,7 +770,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
             <button
               type="button"
               onClick={onNewBlank}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-50"
+              className="inline-flex self-start sm:self-auto items-center gap-1 rounded-md border border-slate-300 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-50 touch-manipulation"
             >
               <Eraser className="h-3.5 w-3.5" /> Clear Blanks
             </button>
@@ -780,9 +785,31 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           />
         </div>
       ) : (
-      <div className="grid flex-1 grid-cols-1 gap-6 p-5 xl:grid-cols-12">
+      <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-6 p-3 sm:p-5 xl:grid-cols-12">
+        {/* Mobile View Toggle between Form and Live Preview (< xl) */}
+        <div className="flex items-center justify-center p-1 bg-slate-200/80 rounded-xl xl:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileSplitTab('form')}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition touch-manipulation ${
+              mobileSplitTab === 'form' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+            }`}
+          >
+            ✏️ Edit Form Fields
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileSplitTab('preview')}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition touch-manipulation ${
+              mobileSplitTab === 'preview' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+            }`}
+          >
+            👁️ Live Preview
+          </button>
+        </div>
+
         {/* Left: Dynamic Form (Strictly matches selected template's fields!) */}
-        <div className="space-y-5 xl:col-span-6">
+        <div className={`space-y-4 sm:space-y-5 xl:col-span-6 ${mobileSplitTab === 'preview' ? 'hidden xl:block' : 'block'}`}>
           {selectedTemplate && selectedTemplate.mode === 'background' ? (
             <>
               {templateOnlyFields.length === 0 && !selectedTemplate.field_mappings.items_table.enabled ? (
@@ -1683,17 +1710,17 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
         </div>
 
         {/* Right: Live Preview */}
-        <div className="xl:col-span-6">
-          <div className="sticky top-20 rounded-xl border border-slate-200 bg-slate-100 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+        <div className={`xl:col-span-6 ${mobileSplitTab === 'form' ? 'hidden xl:block' : 'block'}`}>
+          <div className="sticky top-20 rounded-xl border border-slate-200 bg-slate-100 p-2.5 sm:p-4 shadow-xs">
+            <div className="mb-2.5 sm:mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600 truncate max-w-[200px] sm:max-w-none">
                 Live Invoice Preview {selectedTemplate ? `— ${selectedTemplate.name}` : ''}
               </span>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-emerald-700">
                 Instant Sync
               </span>
             </div>
-            <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-1">
+            <div className="max-h-[calc(100vh-11rem)] overflow-y-auto overflow-x-auto mobile-scroll pr-1">
               <LivePreview
                 template={selectedTemplate}
                 form={form}
@@ -1708,8 +1735,8 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
 
       {/* Overwrite Confirmation Modal */}
       {confirmOverwriteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl bg-white p-4 sm:p-6 shadow-xl">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-amber-500" />
               <div>

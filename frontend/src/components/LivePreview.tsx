@@ -549,18 +549,18 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div ref={containerRef} className="w-full">
-      <div className="min-h-[760px] w-full rounded-lg border border-slate-300 bg-white p-8 shadow-md">
+    <div ref={containerRef} className="w-full overflow-x-auto mobile-scroll">
+      <div className="min-h-[760px] w-full min-w-[320px] sm:min-w-0 rounded-lg border border-slate-300 bg-white p-3.5 sm:p-6 lg:p-8 shadow-md">
         <div className="mb-2 rounded border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
           No template selected — showing standard A4 layout. Upload your own template in{' '}
           <strong>My Invoice Templates</strong> for an exact match.
         </div>
-        <div className="mt-4 flex items-start justify-between border-b border-slate-300 pb-4">
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-slate-300 pb-4">
           <div>
             {hasLogo && (
               <img src={api.getLogoUrl()} alt="Logo" className="mb-2 max-h-12 object-contain" />
             )}
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
               {form.company_details.company_name || 'Your Company Name'}
             </h2>
             <p className="whitespace-pre-line text-xs text-slate-600">
@@ -570,15 +570,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
               <p className="text-xs text-slate-600">GSTIN: {form.company_details.gstin}</p>
             )}
           </div>
-          <div className="text-right text-xs">
-            <div className="text-lg font-bold uppercase tracking-wide text-indigo-700">Tax Invoice</div>
+          <div className="text-left sm:text-right text-xs">
+            <div className="text-base sm:text-lg font-bold uppercase tracking-wide text-indigo-700">Tax Invoice</div>
             <div className="mt-1 font-semibold">Invoice #: {form.invoice_number}</div>
             <div>Date: {form.invoice_date}</div>
             {form.due_date && <div>Due Date: {form.due_date}</div>}
           </div>
         </div>
 
-        <div className="my-4 grid grid-cols-2 gap-4 text-xs">
+        <div className="my-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
           <div className="rounded bg-slate-50 p-3">
             <div className="font-bold uppercase text-slate-500">Bill To</div>
             <div className="mt-1 font-semibold text-slate-900">
@@ -600,38 +600,40 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
           </div>
         </div>
 
-        <table className="w-full border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-800 text-white">
-              <th className="border border-slate-700 px-2 py-1.5 text-center">#</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-left">Description</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-center">HSN</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-right">Qty</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-right">Rate</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-right">GST%</th>
-              <th className="border border-slate-700 px-2 py-1.5 text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {calc.items.map((it) => (
-              <tr key={it.sl_no}>
-                <td className="border border-slate-300 px-2 py-1.5 text-center">{it.sl_no}</td>
-                <td className="border border-slate-300 px-2 py-1.5">{it.description || '-'}</td>
-                <td className="border border-slate-300 px-2 py-1.5 text-center">{it.hsn_sac}</td>
-                <td className="border border-slate-300 px-2 py-1.5 text-right">
-                  {it.quantity} {it.unit}
-                </td>
-                <td className="border border-slate-300 px-2 py-1.5 text-right">{fmt(it.rate)}</td>
-                <td className="border border-slate-300 px-2 py-1.5 text-right">{it.gst_percent}%</td>
-                <td className="border border-slate-300 px-2 py-1.5 text-right font-medium">
-                  {fmt(it.total_amount)}
-                </td>
+        <div className="overflow-x-auto mobile-scroll">
+          <table className="w-full border-collapse text-xs min-w-[500px]">
+            <thead>
+              <tr className="bg-slate-800 text-white">
+                <th className="border border-slate-700 px-2 py-1.5 text-center">#</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-left">Description</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-center">HSN</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-right">Qty</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-right">Rate</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-right">GST%</th>
+                <th className="border border-slate-700 px-2 py-1.5 text-right">Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {calc.items.map((it) => (
+                <tr key={it.sl_no}>
+                  <td className="border border-slate-300 px-2 py-1.5 text-center">{it.sl_no}</td>
+                  <td className="border border-slate-300 px-2 py-1.5">{it.description || '-'}</td>
+                  <td className="border border-slate-300 px-2 py-1.5 text-center">{it.hsn_sac}</td>
+                  <td className="border border-slate-300 px-2 py-1.5 text-right">
+                    {it.quantity} {it.unit}
+                  </td>
+                  <td className="border border-slate-300 px-2 py-1.5 text-right">{fmt(it.rate)}</td>
+                  <td className="border border-slate-300 px-2 py-1.5 text-right">{it.gst_percent}%</td>
+                  <td className="border border-slate-300 px-2 py-1.5 text-right font-medium">
+                    {fmt(it.total_amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-        <div className="mt-4 flex justify-between gap-6 text-xs">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 text-xs">
           <div className="flex-1 space-y-2">
             <div>
               <span className="font-semibold">Amount in Words:</span>{' '}
@@ -649,7 +651,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
               </div>
             )}
           </div>
-          <div className="w-56 space-y-1">
+          <div className="w-full sm:w-56 space-y-1">
             <div className="flex justify-between">
               <span>Taxable Value:</span>
               <span>{fmt(calc.taxable_total)}</span>

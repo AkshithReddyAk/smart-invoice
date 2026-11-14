@@ -148,30 +148,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <div className="max-w-4xl space-y-6 p-6">
+    <div className="max-w-4xl space-y-4 sm:space-y-6 p-3 sm:p-5 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Settings</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
           Configure default company details, invoice numbering, payment details, and database backups.
         </p>
       </div>
 
       {msg && (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" /> {msg}
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs font-medium text-emerald-700">
+          <CheckCircle2 className="h-4 w-4 shrink-0" /> {msg}
         </div>
       )}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-5">
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-bold text-slate-900">Company Profile</h2>
-          <div className="mb-4 flex items-center gap-4">
-            <div className="flex h-16 w-28 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+      <form onSubmit={handleSave} className="space-y-4 sm:space-y-5">
+        <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
+          <h2 className="mb-3 sm:mb-4 text-sm sm:text-base font-bold text-slate-900">Company Profile</h2>
+          <div className="mb-4 flex flex-col xs:flex-row items-start xs:items-center gap-3 sm:gap-4">
+            <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
               {form.company_logo_path ? (
                 <img src={api.getLogoUrl()} alt="Company Logo" className="h-full w-full object-contain p-1" />
               ) : (
@@ -192,7 +192,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <button
                 type="button"
                 onClick={() => logoRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 touch-manipulation"
               >
                 <Upload className="h-3.5 w-3.5" /> Upload Company Logo
               </button>
@@ -206,7 +206,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.company_name}
                 onChange={(e) => setForm((p) => ({ ...p, company_name: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -214,7 +214,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.gstin}
                 onChange={(e) => setForm((p) => ({ ...p, gstin: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -222,7 +222,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.pan_number}
                 onChange={(e) => setForm((p) => ({ ...p, pan_number: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -230,7 +230,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -238,7 +238,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -246,7 +246,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.website}
                 onChange={(e) => setForm((p) => ({ ...p, website: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div className="sm:col-span-2">
@@ -255,21 +255,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 rows={2}
                 value={form.company_address}
                 onChange={(e) => setForm((p) => ({ ...p, company_address: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-bold text-slate-900">Invoice & Payment Defaults</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
+          <h2 className="mb-3 sm:mb-4 text-sm sm:text-base font-bold text-slate-900">Invoice & Payment Defaults</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label className="text-xs font-medium text-slate-600">Invoice Number Prefix</label>
               <input
                 value={form.invoice_prefix}
                 onChange={(e) => setForm((p) => ({ ...p, invoice_prefix: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -281,7 +281,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onChange={(e) =>
                   setForm((p) => ({ ...p, next_invoice_seq: Math.max(1, Number(e.target.value) || 1) }))
                 }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -291,7 +291,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onChange={(e) =>
                   setForm((p) => ({ ...p, default_paper_size: e.target.value as PaperSize }))
                 }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               >
                 <option value="A4">A4</option>
                 <option value="TEMPLATE">Original Template Size</option>
@@ -304,7 +304,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onChange={(e) =>
                   setForm((p) => ({ ...p, default_place_of_supply: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -312,7 +312,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.default_payment_terms}
                 onChange={(e) => setForm((p) => ({ ...p, default_payment_terms: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div>
@@ -320,7 +320,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <input
                 value={form.upi_id}
                 onChange={(e) => setForm((p) => ({ ...p, upi_id: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div className="sm:col-span-3">
@@ -329,7 +329,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 rows={2}
                 value={form.bank_account_details}
                 onChange={(e) => setForm((p) => ({ ...p, bank_account_details: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
             <div className="sm:col-span-3">
@@ -339,7 +339,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onChange={(e) =>
                   setForm((p) => ({ ...p, default_payment_instructions: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm touch-manipulation"
               />
             </div>
           </div>
@@ -348,7 +348,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 touch-manipulation"
             >
               <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Settings'}
             </button>
@@ -357,38 +357,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </form>
 
       {/* User Security & Reset Password Section */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="border-b border-slate-100 pb-4 mb-4">
+      <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
+        <div className="border-b border-slate-100 pb-3 sm:pb-4 mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-              <KeyRound className="h-5 w-5 text-indigo-600" /> Reset Password
+            <h2 className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
+              <KeyRound className="h-5 w-5 text-indigo-600 shrink-0" /> Reset Password
             </h2>
             {currentUserPhone && (
-              <span className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-semibold text-indigo-700">
+              <span className="rounded-full bg-indigo-50 border border-indigo-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold text-indigo-700">
                 User: +91 {currentUserPhone}
               </span>
             )}
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Change your personal login password. Once updated, your old password will be <strong>immediately invalidated</strong> and cannot be used to log in for <strong>+91 {currentUserPhone || 'your account'}</strong>.
+            Change your personal login password. Once updated, your old password will be <strong>immediately invalidated</strong>.
           </p>
         </div>
 
         {pwMsg && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800">
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs font-semibold text-emerald-800">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>{pwMsg}</span>
           </div>
         )}
 
         {pwError && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-800">
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-800">
             <ShieldAlert className="h-4 w-4 text-rose-600 shrink-0" />
             <span>{pwError}</span>
           </div>
         )}
 
-        <form onSubmit={handleChangePassword} className="space-y-4 max-w-xl">
+        <form onSubmit={handleChangePassword} className="space-y-3.5 sm:space-y-4 max-w-xl">
           {/* Old Password */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -399,13 +399,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 type={showOldPw ? 'text' : 'password'}
                 value={pwForm.oldPassword}
                 onChange={(e) => setPwForm({ ...pwForm, oldPassword: e.target.value })}
-                placeholder="Enter current password (e.g. Ak@2004 or Ak@200419)"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                placeholder="Enter current password"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 touch-manipulation"
               />
               <button
                 type="button"
                 onClick={() => setShowOldPw(!showOldPw)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center text-slate-400 hover:text-slate-600 touch-manipulation"
                 tabIndex={-1}
               >
                 {showOldPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -425,12 +425,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   value={pwForm.newPassword}
                   onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
                   placeholder="Min 6 characters"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 touch-manipulation"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPw(!showNewPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center text-slate-400 hover:text-slate-600 touch-manipulation"
                   tabIndex={-1}
                 >
                   {showNewPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -449,12 +449,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   value={pwForm.confirmPassword}
                   onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
                   placeholder="Re-type new password"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2 pr-10 text-xs shadow-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 touch-manipulation"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPw(!showConfirmPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center text-slate-400 hover:text-slate-600 touch-manipulation"
                   tabIndex={-1}
                 >
                   {showConfirmPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -467,7 +467,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <button
               type="submit"
               disabled={pwLoading || !pwForm.oldPassword || !pwForm.newPassword || !pwForm.confirmPassword}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 active:scale-98 transition disabled:opacity-50 touch-manipulation"
             >
               {pwLoading ? (
                 <>
@@ -486,20 +486,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </section>
 
       {/* Database Backup & Restore */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
+      <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-              <Database className="h-5 w-5 text-indigo-600" /> Database Backup & Restore
+            <h2 className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
+              <Database className="h-5 w-5 text-indigo-600 shrink-0" /> Database Backup & Restore
             </h2>
             <p className="mt-1 text-xs text-slate-500">
               Download a complete ZIP backup of your database, uploaded templates, logos, and generated PDFs, or restore from an archive.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto shrink-0">
             <a
               href={api.getBackupExportUrl()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 touch-manipulation text-center"
             >
               <Download className="h-4 w-4" /> Download Backup ZIP
             </a>
@@ -516,7 +516,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <button
               type="button"
               onClick={() => restoreRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 touch-manipulation"
             >
               <Upload className="h-4 w-4" /> Restore Backup
             </button>

@@ -104,6 +104,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const [docxStruct, setDocxStruct] = useState<any>(null);
   const [copiedToken, setCopiedToken] = useState('');
   const [embeddedWidgets, setEmbeddedWidgets] = useState<FieldOverlay[]>([]);
+  const [mobileEditorTab, setMobileEditorTab] = useState<'canvas' | 'palette' | 'properties'>('canvas');
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -576,21 +577,21 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     };
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-4 backdrop-blur-xs">
         <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">DOCX Template Inspector</h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">DOCX Template Inspector</h3>
               <p className="text-xs text-slate-500">
                 Mode B: Preserves original Word formatting, borders, fonts, and logos.
               </p>
             </div>
-            <button onClick={onClose} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100">
+            <button onClick={onClose} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 touch-manipulation">
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="grid flex-1 grid-cols-1 gap-6 overflow-y-auto p-6 md:grid-cols-2">
+          <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-6 overflow-y-auto p-4 sm:p-6 md:grid-cols-2">
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold uppercase text-slate-600">Template Name</label>
@@ -752,14 +753,14 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/75">
       {/* Top Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 bg-slate-900 px-5 py-3 text-white">
-        <div className="flex items-center gap-3">
-          <Layers className="h-5 w-5 text-indigo-400" />
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b border-slate-700 bg-slate-900 px-3 py-2 sm:px-5 sm:py-3 text-white overflow-x-auto mobile-scroll">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Layers className="h-5 w-5 text-indigo-400 shrink-0" />
           <div>
             <input
               value={tplName}
               onChange={(e) => setTplName(e.target.value)}
-              className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-sm font-semibold text-white focus:border-indigo-400 focus:outline-none"
+              className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs sm:text-sm font-semibold text-white focus:border-indigo-400 focus:outline-none touch-manipulation"
             />
             <span className="ml-3 hidden text-xs text-slate-400 md:inline">
               Click & drag on any blank to draw your own field box
@@ -767,34 +768,34 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <div className="inline-flex rounded-lg bg-slate-800 p-0.5 text-xs font-medium">
             <button
               type="button"
               onClick={() => setDrawTool('draw_field')}
-              className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
+              className={`inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 touch-manipulation ${
                 drawTool === 'draw_field' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
-              <PenTool className="h-3.5 w-3.5" /> Draw Field
+              <PenTool className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Draw</span> Field
             </button>
             <button
               type="button"
               onClick={() => setDrawTool('select')}
-              className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
+              className={`inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 touch-manipulation ${
                 drawTool === 'select' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
-              <MousePointer className="h-3.5 w-3.5" /> Select / Move
+              <MousePointer className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Select /</span> Move
             </button>
             <button
               type="button"
               onClick={() => setDrawTool('draw_mask')}
-              className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 ${
+              className={`inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 touch-manipulation ${
                 drawTool === 'draw_mask' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
-              <Eraser className="h-3.5 w-3.5" /> Draw Mask
+              <Eraser className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Draw</span> Mask
             </button>
           </div>
 
@@ -806,7 +807,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 setSelectedId(embeddedWidgets[0]?.id ?? null);
                 setSelectedKind(embeddedWidgets[0] ? 'field' : null);
               }}
-              className="rounded-lg border border-emerald-500/60 bg-emerald-600/20 px-2.5 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-600/40"
+              className="rounded-lg border border-emerald-500/60 bg-emerald-600/20 px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-600/40 touch-manipulation"
             >
               Import PDF Fields ({embeddedWidgets.length})
             </button>
@@ -826,7 +827,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                     // ignore
                   }
                 }}
-                className="rounded-lg border border-indigo-400/60 bg-indigo-600/20 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-600/40"
+                className="hidden sm:inline-block rounded-lg border border-indigo-400/60 bg-indigo-600/20 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-600/40 touch-manipulation"
               >
                 Match Template Fonts
               </button>
@@ -839,9 +840,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                     setSelectedKind(null);
                   }
                 }}
-                className="rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white"
+                className="rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white touch-manipulation"
               >
-                Clear Fields
+                Clear
               </button>
             </>
           )}
@@ -852,7 +853,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 <button
                   key={pg}
                   onClick={() => setCurrentPage(pg)}
-                  className={`rounded px-2 py-0.5 ${
+                  className={`rounded px-2 py-0.5 touch-manipulation ${
                     currentPage === pg ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-700'
                   }`}
                 >
@@ -863,30 +864,61 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           )}
 
           <div className="flex items-center gap-1 rounded bg-slate-800 px-2 py-1 text-xs">
-            <button onClick={() => setZoom((z) => Math.max(60, z - 15))} className="p-1 hover:text-indigo-300">
+            <button onClick={() => setZoom((z) => Math.max(60, z - 15))} className="p-1 hover:text-indigo-300 touch-manipulation">
               <ZoomOut className="h-4 w-4" />
             </button>
-            <span className="w-11 text-center">{zoom}%</span>
-            <button onClick={() => setZoom((z) => Math.min(180, z + 15))} className="p-1 hover:text-indigo-300">
+            <span className="w-9 sm:w-11 text-center">{zoom}%</span>
+            <button onClick={() => setZoom((z) => Math.min(180, z + 15))} className="p-1 hover:text-indigo-300 touch-manipulation">
               <ZoomIn className="h-4 w-4" />
             </button>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800"
+            className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 touch-manipulation"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 sm:px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 touch-manipulation"
           >
             <Save className="h-4 w-4" />
-            {saving ? 'Saving...' : 'Save Template Mapping'}
+            <span className="truncate">{saving ? 'Saving...' : 'Save'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Mobile/Tablet Workspace Mode Switcher */}
+      <div className="flex items-center justify-around border-b border-slate-700 bg-slate-800 p-1.5 text-xs font-semibold text-slate-300 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileEditorTab('palette')}
+          className={`flex-1 py-1.5 text-center rounded-md transition touch-manipulation ${
+            mobileEditorTab === 'palette' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          🎨 Palette
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileEditorTab('canvas')}
+          className={`flex-1 py-1.5 text-center rounded-md transition touch-manipulation ${
+            mobileEditorTab === 'canvas' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          📄 Canvas
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileEditorTab('properties')}
+          className={`flex-1 py-1.5 text-center rounded-md transition touch-manipulation ${
+            mobileEditorTab === 'properties' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          ⚙️ Properties
+        </button>
       </div>
 
       {error && (
@@ -896,7 +928,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       {/* Main 3-Pane Workspace */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Palette */}
-        <div className="w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-4">
+        <div className={`w-full lg:w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-3.5 sm:p-4 mobile-scroll ${mobileEditorTab === 'palette' ? 'block' : 'hidden lg:block'}`}>
           <div className="mb-3 grid grid-cols-3 gap-1 rounded-lg bg-slate-100 p-1 text-xs font-medium">
             <button
               onClick={() => setActiveTab('fields')}
@@ -1126,7 +1158,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
 
         {/* Center Interactive Template Canvas */}
-        <div className="flex-1 overflow-auto bg-slate-200 p-6">
+        <div className={`flex-1 overflow-auto bg-slate-200 p-2 sm:p-6 mobile-scroll ${mobileEditorTab === 'canvas' ? 'block' : 'hidden lg:block'}`}>
           <div
             ref={canvasRef}
             onPointerDown={(e) => {
@@ -1387,7 +1419,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
 
         {/* Right Inspector */}
-        <div className="w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-white p-4">
+        <div className={`w-full lg:w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-white p-3.5 sm:p-4 mobile-scroll ${mobileEditorTab === 'properties' ? 'block' : 'hidden lg:block'}`}>
           <div className="mb-3 flex items-center justify-between">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600">Properties</h4>
             {(selectedField || selectedMask || selectedCol) && (

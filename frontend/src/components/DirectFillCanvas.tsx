@@ -67,6 +67,7 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(820);
+  const [mobileZoom, setMobileZoom] = useState<'fit' | 'zoom'>('fit');
 
   useEffect(() => {
     const el = containerRef.current;
@@ -265,8 +266,39 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
   const ptToPx = containerWidth / baseWidthPt;
 
   return (
-    <div ref={containerRef} className="mx-auto w-full max-w-[880px] space-y-6">
-      {pages.map((pg) => {
+    <div className="w-full">
+      <div className="flex items-center justify-between gap-2 mb-2 sm:hidden px-1">
+        <span className="text-[11px] text-slate-500 font-medium">Canvas Mode:</span>
+        <div className="inline-flex rounded-lg bg-slate-200 p-0.5 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setMobileZoom('fit')}
+            className={`px-2.5 py-1 rounded-md transition touch-manipulation ${
+              mobileZoom === 'fit' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+            }`}
+          >
+            Fit Screen
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileZoom('zoom')}
+            className={`px-2.5 py-1 rounded-md transition touch-manipulation ${
+              mobileZoom === 'zoom' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600'
+            }`}
+          >
+            Zoom to Type 🔍
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto mobile-scroll pb-2">
+        <div
+          ref={containerRef}
+          className={`mx-auto space-y-6 ${
+            mobileZoom === 'zoom' ? 'w-[720px] max-w-none' : 'w-full max-w-[880px]'
+          }`}
+        >
+          {pages.map((pg) => {
         const aspectRatio = (pg.height_pt || 841.89) / Math.max(1, pg.width_pt || 595.28);
         const pageFields = template.field_mappings.fields.filter((f) => f.page === pg.page);
         const pageMasks = template.field_mappings.masks.filter((m) => m.page === pg.page);
@@ -351,6 +383,8 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
           </div>
         );
       })}
+        </div>
+      </div>
     </div>
   );
 };

@@ -179,19 +179,31 @@ export function App() {
     setMobileOpen(false);
   };
 
-  const renderSidebarContent = () => (
+  const renderSidebarContent = (isMobile = false) => (
     <div className="flex h-full flex-col bg-slate-900 text-slate-100">
-      <div className="flex items-center gap-2.5 border-b border-slate-800 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow">
-          <Receipt className="h-5 w-5" />
+      <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow">
+            <Receipt className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-bold tracking-tight text-white truncate">SmartInvoice</div>
+            <div className="text-[11px] text-slate-400 truncate">Template-Exact Studio</div>
+          </div>
         </div>
-        <div>
-          <div className="text-sm font-bold tracking-tight text-white">SmartInvoice</div>
-          <div className="text-[11px] text-slate-400">Template-Exact Studio</div>
-        </div>
+        {isMobile && (
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition touch-manipulation"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
+      <nav className="flex-1 space-y-1 p-3 overflow-y-auto mobile-scroll">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = section === item.id;
@@ -200,7 +212,7 @@ export function App() {
             <button
               key={item.id}
               onClick={() => navigate(item.id)}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors touch-manipulation ${
                 active
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
@@ -212,7 +224,7 @@ export function App() {
               </div>
               {item.id === 'templates' && (
                 isLockedTemplate ? (
-                  <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
                     <Lock className="h-2.5 w-2.5" /> PIN
                   </span>
                 ) : (
@@ -222,7 +234,7 @@ export function App() {
                       lockTemplates();
                     }}
                     title="Click to lock templates"
-                    className="inline-flex items-center gap-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-500/30 cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-500/30 cursor-pointer"
                   >
                     <Unlock className="h-2.5 w-2.5" /> Lock
                   </span>
@@ -253,7 +265,7 @@ export function App() {
             <button
               onClick={handleLogout}
               title="Log out from SmartInvoice"
-              className="ml-2 rounded-lg p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 transition"
+              className="ml-2 rounded-lg p-2 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 transition touch-manipulation"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -281,37 +293,47 @@ export function App() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Desktop Sidebar */}
-      <aside className="no-print hidden w-64 shrink-0 lg:block">{renderSidebarContent()}</aside>
+      <aside className="no-print hidden w-64 shrink-0 lg:block">{renderSidebarContent(false)}</aside>
 
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div className="w-64">{renderSidebarContent()}</div>
+          <div className="w-72 max-w-[85vw] shadow-2xl animate-in slide-in-from-left duration-200">
+            {renderSidebarContent(true)}
+          </div>
           <div
-            className="flex-1 bg-slate-900/50"
+            className="flex-1 bg-slate-900/60 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
         </div>
       )}
 
       {/* Main Content */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         {/* Mobile Header */}
-        <header className="no-print flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-1.5 text-slate-700 hover:bg-slate-100"
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-          <span className="text-sm font-bold text-slate-900">SmartInvoice Studio</span>
+        <header className="no-print flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2.5 sm:px-4 sm:py-3 lg:hidden shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation menu"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 touch-manipulation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-sm font-bold text-slate-900 truncate">SmartInvoice</span>
+              <span className="hidden sm:inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 truncate">
+                {NAV_ITEMS.find((n) => n.id === section)?.label}
+              </span>
+            </div>
+          </div>
           <button
             onClick={handleLogout}
             title="Logout"
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 touch-manipulation"
           >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Logout</span>
+            <LogOut className="h-4 w-4" />
+            <span className="hidden xs:inline">Logout</span>
           </button>
         </header>
 

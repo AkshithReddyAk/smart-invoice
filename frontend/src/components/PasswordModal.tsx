@@ -67,34 +67,34 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-4 backdrop-blur-sm animate-fade-in">
       <div
-        className={`w-full max-w-md rounded-2xl bg-white shadow-2xl transition-all border border-slate-100 overflow-hidden ${
+        className={`w-full max-w-md rounded-2xl bg-white shadow-2xl transition-all border border-slate-100 overflow-hidden mx-auto ${
           shake ? 'animate-shake' : ''
         }`}
       >
         {/* Header decoration */}
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md shadow-inner text-white">
-              <Lock className="h-5 w-5" />
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-4 sm:px-6 sm:py-5 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md shadow-inner text-white">
+              <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
-              <p className="text-xs text-indigo-100">Protected Area</p>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight truncate">{title}</h3>
+              <p className="text-[11px] sm:text-xs text-indigo-100">Protected Area</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white transition"
+            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition touch-manipulation"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
           <p className="text-xs leading-relaxed text-slate-600">{description}</p>
 
           <div>
@@ -111,7 +111,7 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
                   if (error) setError('');
                 }}
                 placeholder="Enter password..."
-                className={`w-full rounded-xl border px-3.5 py-2.5 pr-10 text-sm shadow-sm outline-none transition focus:ring-2 ${
+                className={`w-full rounded-xl border px-3.5 py-2.5 pr-10 text-sm shadow-xs outline-none transition focus:ring-2 touch-manipulation ${
                   error
                     ? 'border-red-400 bg-red-50/50 text-red-900 focus:border-red-500 focus:ring-red-200'
                     : 'border-slate-300 bg-white text-slate-900 focus:border-indigo-500 focus:ring-indigo-100'
@@ -120,7 +120,7 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center text-slate-400 hover:text-slate-600 touch-manipulation"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -136,22 +136,22 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-500">
-            <Lock className="h-3 w-3 text-slate-400" />
+            <Lock className="h-3 w-3 text-slate-400 shrink-0" />
             <span>Auto-locks immediately whenever you switch to another page.</span>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition touch-manipulation"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={verifying}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50 touch-manipulation"
             >
               {verifying ? (
                 <>
