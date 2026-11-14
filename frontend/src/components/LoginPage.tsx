@@ -110,9 +110,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5 sm:mb-2">
                   Authorized Mobile Number
                 </label>
-                <div className="relative flex items-center">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 text-xs font-bold text-slate-300 border-r border-slate-700 select-none z-10">
-                    <span className="mr-1 text-sm leading-none">🇮🇳</span>
+                <div className="flex items-center w-full rounded-xl border border-slate-600 bg-slate-900/80 shadow-inner transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 overflow-hidden">
+                  <div
+                    onClick={() => phoneInputRef.current?.focus()}
+                    className="flex items-center gap-1.5 px-3 py-3 text-xs font-bold text-slate-300 border-r border-slate-700 bg-slate-800/40 select-none shrink-0 cursor-text"
+                  >
+                    <span className="text-sm leading-none">🇮🇳</span>
                     <span className="tracking-tight text-slate-200">+91</span>
                   </div>
                   <input
@@ -126,8 +129,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     }}
                     placeholder="Enter 10-digit number"
                     maxLength={14}
-                    style={{ paddingLeft: '78px' }}
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pr-3 sm:pr-4 text-sm font-semibold text-white placeholder:text-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
+                    className="flex-1 min-w-0 bg-transparent py-3 px-3 sm:px-3.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
                   />
                 </div>
               </div>
@@ -137,8 +139,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5 sm:mb-2">
                   Access Password
                 </label>
-                <div className="relative flex items-center">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 select-none z-10">
+                <div className="flex items-center w-full rounded-xl border border-slate-600 bg-slate-900/80 shadow-inner transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 overflow-hidden pr-2">
+                  <div
+                    onClick={() => passwordInputRef.current?.focus()}
+                    className="flex items-center justify-center pl-3.5 pr-1 text-slate-400 select-none shrink-0 cursor-text"
+                  >
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -150,13 +155,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                       if (error) setError('');
                     }}
                     placeholder="Enter password"
-                    style={{ paddingLeft: '40px' }}
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pr-11 text-sm font-semibold text-white placeholder:text-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 touch-manipulation"
+                    className="flex-1 min-w-0 bg-transparent py-3 px-2.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 flex h-8 w-8 items-center justify-center text-slate-400 hover:text-slate-200 touch-manipulation"
+                    className="flex h-8 w-8 items-center justify-center text-slate-400 hover:text-slate-200 transition touch-manipulation shrink-0"
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
