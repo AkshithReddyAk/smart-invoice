@@ -133,11 +133,10 @@ function buildInitialForm(
     templates[0] ||
     null;
 
-  const today = new Date().toISOString().slice(0, 10);
   return {
     template_id: defaultTpl ? defaultTpl.id : null,
     invoice_number: `${settings.invoice_prefix}${String(settings.next_invoice_seq).padStart(4, '0')}`,
-    invoice_date: today,
+    invoice_date: '',
     due_date: '',
     place_of_supply: settings.default_place_of_supply,
     payment_terms: settings.default_payment_terms,
@@ -459,8 +458,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
 
   const validateClient = (preparedForm: InvoiceFormState): string | null => {
     if (!preparedForm.invoice_number.trim()) return 'Invoice Number is required.';
-    if (!preparedForm.invoice_date.trim()) return 'Invoice Date is required.';
-    if (preparedForm.due_date && preparedForm.due_date < preparedForm.invoice_date) {
+    if (preparedForm.due_date && preparedForm.invoice_date && preparedForm.due_date < preparedForm.invoice_date) {
       return 'Due Date cannot be earlier than Invoice Date.';
     }
     if (!preparedForm.customer_name.trim()) return 'Customer Name (Bill To) is required.';

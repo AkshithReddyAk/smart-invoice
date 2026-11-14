@@ -71,7 +71,7 @@ def _generate_fallback_pdf(invoice_dict: dict, out_pdf_path: Path) -> Path:
         Paragraph(comp.get("company_name") or "TAX INVOICE", title_style),
         Paragraph(f"{comp.get('company_address', '')} | GSTIN: {comp.get('gstin', '-')}", norm),
         Spacer(1, 10),
-        Paragraph(f"<b>Invoice No:</b> {invoice_dict['invoice_number']} &nbsp;&nbsp; <b>Date:</b> {invoice_dict['invoice_date']}", norm),
+        Paragraph(f"<b>Invoice No:</b> {invoice_dict['invoice_number']}" + (f" &nbsp;&nbsp; <b>Date:</b> {invoice_dict['invoice_date']}" if invoice_dict.get('invoice_date') else ""), norm),
         Paragraph(f"<b>Bill To:</b> {invoice_dict['customer_name']} &nbsp;&nbsp; {invoice_dict.get('billing_address', '')}", norm),
         Spacer(1, 10),
     ]

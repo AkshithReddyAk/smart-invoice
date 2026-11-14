@@ -421,7 +421,7 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
                     }
                     handleFieldChange(fld, text);
                   }}
-                  placeholder={isDateField ? 'DD/MM/YYYY' : fld.label}
+                  placeholder={isDateField ? '' : fld.label}
                   title={fld.label}
                   maxLength={isDateField ? 10 : undefined}
                   style={sharedStyle}

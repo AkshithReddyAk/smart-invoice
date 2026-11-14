@@ -170,7 +170,7 @@ class InvoiceItemOut(BaseModel):
 class InvoicePayload(BaseModel):
     template_id: str | None = None
     invoice_number: str
-    invoice_date: str
+    invoice_date: str = ""
     due_date: str = ""
     place_of_supply: str = ""
     payment_terms: str = ""
@@ -207,11 +207,14 @@ class InvoicePayload(BaseModel):
     @field_validator("invoice_date")
     @classmethod
     def validate_invoice_date(cls, v: str) -> str:
+        s = (v or "").strip()
+        if not s:
+            return ""
         try:
-            date.fromisoformat(v.strip())
+            date.fromisoformat(s)
         except ValueError:
             raise ValueError("Invoice date must be a valid date in YYYY-MM-DD format")
-        return v.strip()
+        return s
 
     @field_validator("due_date")
     @classmethod
@@ -226,7 +229,7 @@ class InvoicePayload(BaseModel):
 
     @model_validator(mode="after")
     def validate_dates_order(self):
-        if self.due_date:
+        if self.due_date and self.invoice_date:
             inv_d = date.fromisoformat(self.invoice_date)
             due_d = date.fromisoformat(self.due_date)
             if due_d < inv_d:

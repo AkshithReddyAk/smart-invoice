@@ -63,11 +63,14 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
     comp = invoice_dict.get("company_details") or {}
     extra = invoice_dict.get("extra_fields") or {}
 
-    inv_date_str = str(invoice_dict.get("invoice_date", ""))
-    display_date = inv_date_str
-    if len(inv_date_str) == 10 and inv_date_str[4] == "-" and inv_date_str[7] == "-":
-        y, m, d = inv_date_str.split("-")
-        display_date = f"{d}/{m}/{y}"
+    inv_date_str = str(invoice_dict.get("invoice_date", "") or "").strip()
+    display_date = ""
+    if inv_date_str:
+        if len(inv_date_str) == 10 and inv_date_str[4] == "-" and inv_date_str[7] == "-":
+            y, m, d = inv_date_str.split("-")
+            display_date = f"{d}/{m}/{y}"
+        else:
+            display_date = inv_date_str
 
     mapping = {
         # Company
@@ -83,9 +86,9 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
         # Invoice
         "invoice_number": str(invoice_dict.get("invoice_number", "")),
         "invoice_no": str(invoice_dict.get("invoice_number", "")),
-        "invoice_date": display_date or inv_date_str,
-        "display_date": display_date or inv_date_str,
-        "date": display_date or inv_date_str,
+        "invoice_date": display_date,
+        "display_date": display_date,
+        "date": display_date,
         "due_date": str(invoice_dict.get("due_date", "")),
         "place_of_supply": str(invoice_dict.get("place_of_supply", "")),
         "payment_terms": str(invoice_dict.get("payment_terms", "")),
@@ -125,10 +128,7 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
     mapping.update(summary_map)
 
     for k, v in extra.items():
-        sval = str(v)
-        if k in mapping and sval == "":
-            continue
-        mapping[str(k)] = sval
+        mapping[str(k)] = str(v)
     return mapping
 
 
