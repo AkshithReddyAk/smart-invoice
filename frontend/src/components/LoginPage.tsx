@@ -110,14 +110,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5 sm:mb-2">
                   Authorized Mobile Number
                 </label>
-                <div className="flex items-center w-full rounded-xl border border-slate-600 bg-slate-900/80 shadow-inner transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 overflow-hidden">
+                <div className="flex items-center w-full rounded-xl border border-slate-600 bg-slate-900/80 shadow-inner transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 px-3.5 overflow-hidden">
                   <div
                     onClick={() => phoneInputRef.current?.focus()}
-                    className="flex items-center gap-1.5 px-3 py-3 text-xs font-bold text-slate-300 border-r border-slate-700 bg-slate-800/40 select-none shrink-0 cursor-text"
+                    className="flex items-center gap-2 select-none shrink-0 cursor-text py-3"
                   >
                     <span className="text-sm leading-none">🇮🇳</span>
-                    <span className="tracking-tight text-slate-200">+91</span>
+                    <span className="text-sm font-semibold text-slate-200 tracking-tight">+91</span>
                   </div>
+                  <div className="w-px h-5 bg-slate-700 mx-3 shrink-0" aria-hidden="true" />
                   <input
                     ref={phoneInputRef}
                     type="tel"
@@ -129,7 +130,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     }}
                     placeholder="Enter 10-digit number"
                     maxLength={14}
-                    className="flex-1 min-w-0 w-full bg-transparent py-3 px-3 sm:px-3.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
+                    className="flex-1 min-w-0 w-full bg-transparent py-3 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 p-0 touch-manipulation"
                   />
                 </div>
               </div>
