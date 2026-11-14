@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smart-invoice-studio
+    name: sri-laxminarayana-invoice
     env: docker
     dockerfilePath: Dockerfile
     plan: free
