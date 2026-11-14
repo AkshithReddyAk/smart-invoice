@@ -100,6 +100,16 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
   const fmt = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const getDisplayTotal = (inv: InvoiceRecord): number => {
+    if (inv.grand_total > 0) return inv.grand_total;
+    const tplVal = inv.extra_fields?.total_value || inv.extra_fields?.total || inv.extra_fields?.grand_total;
+    if (tplVal) {
+      const n = parseFloat(String(tplVal).replace(/,/g, '').replace(/₹/g, '').trim());
+      if (!isNaN(n) && n > 0) return n;
+    }
+    return inv.grand_total;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-5 p-3 sm:p-5 lg:p-6">
       <div>
@@ -187,7 +197,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                       <div className="text-xs text-slate-700 font-medium mt-0.5">{inv.customer_name}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-indigo-700">₹ {fmt(inv.grand_total)}</div>
+                      <div className="text-sm font-bold text-indigo-700">₹ {fmt(getDisplayTotal(inv))}</div>
                       <div className="text-[11px] text-slate-400">{inv.invoice_date}</div>
                     </div>
                   </div>
@@ -280,7 +290,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                         {inv.template_name_snapshot || 'Standard A4'}
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-slate-900">
-                        ₹ {fmt(inv.grand_total)}
+                        ₹ {fmt(getDisplayTotal(inv))}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="inline-flex flex-wrap items-center justify-end gap-1.5">
@@ -374,7 +384,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                   <strong>Tax Mode:</strong> {viewingInv.tax_mode}
                 </div>
                 <div className="mt-1 text-base font-bold text-indigo-700">
-                  Total: ₹ {fmt(viewingInv.grand_total)}
+                  Total: ₹ {fmt(getDisplayTotal(viewingInv))}
                 </div>
               </div>
             </div>
@@ -391,22 +401,81 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {viewingInv.items.map((it) => (
-                    <tr key={it.sl_no}>
-                      <td className="border border-slate-200 px-2 py-1.5 text-center">{it.sl_no}</td>
-                      <td className="border border-slate-200 px-2 py-1.5">{it.description}</td>
-                      <td className="border border-slate-200 px-2 py-1.5 text-center">
-                        {it.quantity} {it.unit}
-                      </td>
-                      <td className="border border-slate-200 px-2 py-1.5 text-right">{fmt(it.rate)}</td>
-                      <td className="border border-slate-200 px-2 py-1.5 text-right">{it.gst_percent}%</td>
-                      <td className="border border-slate-200 px-2 py-1.5 text-right font-semibold">
-                        {fmt(it.total_amount)}
-                      </td>
-                    </tr>
-                  ))}
+                  {viewingInv.items.map((it) => {
+                    const itemRate =
+                      it.rate > 0
+                        ? it.rate
+                        : parseFloat(
+                            String(
+                              viewingInv.extra_fields?.taxable ||
+                                viewingInv.extra_fields?.Taxable ||
+                                viewingInv.extra_fields?.total_value ||
+                                '0'
+                            ).replace(/,/g, '')
+                          ) || 0;
+                    const itemTotal = it.total_amount > 0 ? it.total_amount : getDisplayTotal(viewingInv);
+                    return (
+                      <tr key={it.sl_no}>
+                        <td className="border border-slate-200 px-2 py-1.5 text-center">{it.sl_no}</td>
+                        <td className="border border-slate-200 px-2 py-1.5 font-medium">{it.description}</td>
+                        <td className="border border-slate-200 px-2 py-1.5 text-center">
+                          {it.quantity} {it.unit}
+                        </td>
+                        <td className="border border-slate-200 px-2 py-1.5 text-right">{fmt(itemRate)}</td>
+                        <td className="border border-slate-200 px-2 py-1.5 text-right">
+                          {viewingInv.extra_fields?.gst_5_ ? '5%' : `${it.gst_percent}%`}
+                        </td>
+                        <td className="border border-slate-200 px-2 py-1.5 text-right font-semibold">
+                          {fmt(itemTotal)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Template Financials & GST Summary */}
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 text-xs space-y-2">
+              <div className="font-bold uppercase tracking-wider text-slate-500 text-[11px]">
+                Template Financials & GST Breakdown
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700">
+                <div>
+                  <span className="text-slate-500">Taxable Value:</span>
+                  <div className="font-bold text-slate-900 mt-0.5">
+                    ₹ {viewingInv.extra_fields?.taxable || viewingInv.extra_fields?.Taxable || fmt(viewingInv.taxable_total)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500">CGST (2.5%):</span>
+                  <div className="font-bold text-slate-900 mt-0.5">
+                    ₹ {viewingInv.extra_fields?.cgst_2_5_ || fmt(viewingInv.cgst_total)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500">SGST (2.5%):</span>
+                  <div className="font-bold text-slate-900 mt-0.5">
+                    ₹ {viewingInv.extra_fields?.sgst_2_5_ || fmt(viewingInv.sgst_total)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500">Total GST (5%):</span>
+                  <div className="font-bold text-indigo-600 mt-0.5">
+                    ₹ {viewingInv.extra_fields?.gst_5_ || fmt(viewingInv.cgst_total + viewingInv.sgst_total)}
+                  </div>
+                </div>
+              </div>
+              {viewingInv.extra_fields?.subsidy && (
+                <div className="text-slate-600 pt-1.5 border-t border-slate-200 flex justify-between">
+                  <span className="text-slate-500">Subsidy:</span>
+                  <span className="font-semibold text-slate-800">₹ {viewingInv.extra_fields.subsidy}</span>
+                </div>
+              )}
+              <div className="text-sm font-bold text-slate-900 pt-1.5 border-t border-slate-200 flex justify-between items-center">
+                <span>Template Total Value:</span>
+                <span className="text-indigo-700 text-base">₹ {viewingInv.extra_fields?.total_value || fmt(getDisplayTotal(viewingInv))}</span>
+              </div>
             </div>
             <div className="mt-5 flex flex-col-reverse xs:flex-row justify-end gap-2">
               <button

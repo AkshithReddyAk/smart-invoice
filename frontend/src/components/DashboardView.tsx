@@ -26,6 +26,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const fmt = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const getDisplayTotal = (inv: any): number => {
+    if (inv.grand_total > 0) return inv.grand_total;
+    const tplVal = inv.extra_fields?.total_value || inv.extra_fields?.total || inv.extra_fields?.grand_total;
+    if (tplVal) {
+      const n = parseFloat(String(tplVal).replace(/,/g, '').replace(/₹/g, '').trim());
+      if (!isNaN(n) && n > 0) return n;
+    }
+    return inv.grand_total;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 p-3 sm:p-5 lg:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -137,7 +147,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <div className="text-xs text-slate-600 font-medium">{inv.customer_name}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-indigo-700">₹ {fmt(inv.grand_total)}</div>
+                      <div className="text-sm font-bold text-indigo-700">₹ {fmt(getDisplayTotal(inv))}</div>
                       <div className="text-[11px] text-slate-400">{inv.invoice_date}</div>
                     </div>
                   </div>
@@ -189,7 +199,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {inv.template_name_snapshot || 'Standard A4'}
                       </td>
                       <td className="px-5 py-3 text-right font-semibold text-slate-900">
-                        ₹ {fmt(inv.grand_total)}
+                        ₹ {fmt(getDisplayTotal(inv))}
                       </td>
                       <td className="px-5 py-3 text-right">
                         <div className="inline-flex items-center gap-2">

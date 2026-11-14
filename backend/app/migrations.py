@@ -91,6 +91,58 @@ def run_migrations() -> None:
                 if resolved:
                     inv.customer_name = resolved
 
+        # Heal totals from extra_fields for existing invoices
+        def _parse_val(val):
+            if not val:
+                return 0.0
+            s = str(val).replace(",", "").replace("₹", "").replace("Rs.", "").replace("Rs", "").strip()
+            try:
+                return float(s)
+            except ValueError:
+                return 0.0
+
+        for inv in invoices:
+            extra = json.loads(inv.extra_fields_json or "{}")
+            if inv.grand_total == 0.0 or inv.cgst_total == 0.0:
+                for k in ("total_value", "Total Value", "total_invoice_value", "total", "grand_total"):
+                    if extra.get(k):
+                        v = _parse_val(extra[k])
+                        if v > 0:
+                            inv.grand_total = v
+                            break
+                for k in ("taxable", "Taxable", "taxable_total", "ex_showroom_price"):
+                    if extra.get(k):
+                        v = _parse_val(extra[k])
+                        if v > 0:
+                            inv.taxable_total = v
+                            if inv.subtotal == 0.0:
+                                inv.subtotal = v
+                            break
+                for k in ("cgst_2_5_", "cgst_total", "cgst"):
+                    if extra.get(k):
+                        v = _parse_val(extra[k])
+                        if v > 0:
+                            inv.cgst_total = v
+                            break
+                for k in ("sgst_2_5_", "sgst_total", "sgst"):
+                    if extra.get(k):
+                        v = _parse_val(extra[k])
+                        if v > 0:
+                            inv.sgst_total = v
+                            break
+                for k in ("gst_5_", "gst_5%", "gst"):
+                    if extra.get(k):
+                        v = _parse_val(extra[k])
+                        if v > 0 and inv.cgst_total == 0.0 and inv.sgst_total == 0.0:
+                            inv.igst_total = v
+                            break
+                if inv.items and inv.items[0].rate == 0.0 and inv.grand_total > 0:
+                    inv.items[0].rate = inv.taxable_total or inv.grand_total
+                    inv.items[0].taxable_amount = inv.taxable_total or inv.grand_total
+                    inv.items[0].gst_percent = 5.0
+                    inv.items[0].gst_amount = inv.cgst_total + inv.sgst_total
+                    inv.items[0].total_amount = inv.grand_total
+
         db.commit()
     finally:
         db.close()

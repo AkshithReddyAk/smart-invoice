@@ -224,16 +224,19 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
 
       // 3. Auto-calculate GST 5% & totals from Ex-Showroom Price / Discount / Down Payment / Subsidy
       const calcTriggers = new Set([
+        'ex_showroom_price',
         'item_ex_showroom_price',
+        'offer_distance',
         'item_offer_discount',
+        'down_payment',
         'item_down_payment',
         'subsidy',
       ]);
       if (autoCalcGst5 && calcTriggers.has(k)) {
-        const exShowroom = parseNum(next.extra_fields.item_ex_showroom_price || '');
-        const disc = parseNum(next.extra_fields.item_offer_discount || '');
+        const exShowroom = parseNum(next.extra_fields.ex_showroom_price || next.extra_fields.item_ex_showroom_price || '');
+        const disc = parseNum(next.extra_fields.offer_distance || next.extra_fields.item_offer_discount || '');
         const subsidy = parseNum(next.extra_fields.subsidy || '');
-        const downPay = parseNum(next.extra_fields.item_down_payment || '');
+        const downPay = parseNum(next.extra_fields.down_payment || next.extra_fields.item_down_payment || '');
 
         if (exShowroom > 0) {
           const netPrice = round2(Math.max(0, exShowroom - disc - subsidy));
@@ -246,10 +249,25 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
           item0.rate = taxable;
           item0.gst_percent = 5;
           item0.discount = 0;
+          item0.taxable_amount = taxable;
+          item0.gst_amount = gst5;
+          item0.total_amount = netPrice;
           if (!item0.description.trim()) item0.description = 'Electric Vehicle';
 
           next.tax_mode = 'cgst_sgst';
           next.auto_round_off = false;
+
+          // Populate template field keys directly
+          next.extra_fields.gst_5_ = fmtNum(gst5);
+          next.extra_fields.balance_amount = fmtNum(balance);
+          next.extra_fields.taxable = fmtNum(taxable);
+          next.extra_fields.Taxable = fmtNum(taxable);
+          next.extra_fields.discount = disc > 0 ? fmtNum(disc) : '0.00';
+          next.extra_fields.cgst_2_5_ = fmtNum(cgst);
+          next.extra_fields.sgst_2_5_ = fmtNum(sgst);
+          next.extra_fields.total_value = fmtNum(netPrice);
+
+          // Populate compatibility keys
           next.extra_fields.item_gst_amount = gst5.toFixed(2);
           next.extra_fields.item_balance_amount = fmtNum(balance);
           next.extra_fields.taxable_total = taxable.toFixed(2);
@@ -258,10 +276,17 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
           next.extra_fields.sgst_total = sgst.toFixed(2);
           next.extra_fields.grand_total = fmtNum(netPrice);
           next.extra_fields.total_invoice_value = fmtNum(netPrice);
+
           const words = amountToIndianWords(netPrice);
           next.extra_fields.amount_in_words = words;
           next.amount_in_words = words;
           next.amount_in_words_manual = false;
+        }
+      } else if (k === 'total_value') {
+        const n = parseNum(rawVal);
+        if (n > 0) {
+          item0.total_amount = n;
+          if (item0.rate === 0) item0.rate = n;
         }
       }
 

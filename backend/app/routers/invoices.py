@@ -143,6 +143,80 @@ def _sanitize_customer_name(cname: str, extra: dict[str, Any]) -> str:
     return s or "Customer"
 
 
+def _parse_num(val: Any) -> float:
+    if val is None:
+        return 0.0
+    s = str(val).strip().replace(",", "").replace("₹", "").replace("Rs.", "").replace("Rs", "").strip()
+    if not s:
+        return 0.0
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
+def _resolve_template_totals(extra: dict[str, Any], calc: dict[str, Any]) -> dict[str, Any]:
+    res = dict(calc)
+
+    # 1. Total / Grand Total from template
+    total_val = 0.0
+    for k in ("total_value", "Total Value", "total_invoice_value", "total", "grand_total"):
+        if k in extra:
+            v = _parse_num(extra[k])
+            if v > 0:
+                total_val = v
+                break
+    if total_val > 0:
+        res["grand_total"] = total_val
+        if res.get("round_off") is None:
+            res["round_off"] = 0.0
+
+    # 2. Taxable total from template
+    taxable_val = 0.0
+    for k in ("taxable", "Taxable", "taxable_total", "ex_showroom_price"):
+        if k in extra:
+            v = _parse_num(extra[k])
+            if v > 0:
+                taxable_val = v
+                break
+    if taxable_val > 0:
+        res["taxable_total"] = taxable_val
+        if res.get("subtotal", 0.0) == 0.0:
+            res["subtotal"] = taxable_val
+
+    # 3. CGST total from template
+    for k in ("cgst_2_5_", "cgst_total", "cgst", "cgst_2.5%"):
+        if k in extra:
+            v = _parse_num(extra[k])
+            if v > 0:
+                res["cgst_total"] = v
+                break
+
+    # 4. SGST total from template
+    for k in ("sgst_2_5_", "sgst_total", "sgst", "sgst_2.5%"):
+        if k in extra:
+            v = _parse_num(extra[k])
+            if v > 0:
+                res["sgst_total"] = v
+                break
+
+    # 5. GST 5% / IGST total from template
+    for k in ("gst_5_", "gst_5%", "gst", "igst_total", "igst"):
+        if k in extra:
+            v = _parse_num(extra[k])
+            if v > 0:
+                if res.get("cgst_total", 0.0) == 0.0 and res.get("sgst_total", 0.0) == 0.0:
+                    res["igst_total"] = v
+                break
+
+    # 6. Amount in words if grand_total exists
+    if res.get("grand_total", 0.0) > 0 and (not res.get("amount_in_words") or res.get("amount_in_words") == "ZERO RUPEES ONLY"):
+        from app.services.calculator import amount_to_indian_words
+        res["amount_in_words"] = amount_to_indian_words(res["grand_total"])
+
+    return res
+
+
 def _render_invoice_artifacts(inv: Invoice, tpl: InvoiceTemplate | None, invoice_dict: dict) -> tuple[str, str]:
     pdf_path = INVOICES_DIR / f"{inv.id}.pdf"
     docx_path = ""
@@ -327,6 +401,7 @@ def create_invoice(payload: InvoicePayload, db: Session = Depends(get_db)):
         auto_round_off=payload.auto_round_off,
         invoice_discount=payload.invoice_discount,
     )
+    calc = _resolve_template_totals(payload.extra_fields, calc)
     comp = _get_company_dict(payload.company_details, db)
     words = (payload.amount_in_words or "").strip() or calc["amount_in_words"]
 
@@ -385,6 +460,13 @@ def create_invoice(payload: InvoicePayload, db: Session = Depends(get_db)):
                 total_amount=ci["total_amount"],
             )
         )
+
+    if inv.items and inv.items[0].rate == 0.0 and calc["grand_total"] > 0:
+        inv.items[0].rate = calc["taxable_total"] or calc["grand_total"]
+        inv.items[0].taxable_amount = calc["taxable_total"] or calc["grand_total"]
+        inv.items[0].gst_percent = 5.0
+        inv.items[0].gst_amount = calc["cgst_total"] + calc["sgst_total"] or calc.get("igst_total", 0.0)
+        inv.items[0].total_amount = calc["grand_total"]
 
     invoice_dict = {
         **payload.model_dump(),
@@ -452,6 +534,7 @@ def update_invoice(invoice_id: str, payload: InvoicePayload, db: Session = Depen
         auto_round_off=payload.auto_round_off,
         invoice_discount=payload.invoice_discount,
     )
+    calc = _resolve_template_totals(payload.extra_fields, calc)
     comp = _get_company_dict(payload.company_details, db)
     words = (payload.amount_in_words or "").strip() or calc["amount_in_words"]
 
@@ -508,6 +591,13 @@ def update_invoice(invoice_id: str, payload: InvoicePayload, db: Session = Depen
                 total_amount=ci["total_amount"],
             )
         )
+
+    if inv.items and inv.items[0].rate == 0.0 and calc["grand_total"] > 0:
+        inv.items[0].rate = calc["taxable_total"] or calc["grand_total"]
+        inv.items[0].taxable_amount = calc["taxable_total"] or calc["grand_total"]
+        inv.items[0].gst_percent = 5.0
+        inv.items[0].gst_amount = calc["cgst_total"] + calc["sgst_total"] or calc.get("igst_total", 0.0)
+        inv.items[0].total_amount = calc["grand_total"]
 
     invoice_dict = {
         **payload.model_dump(),

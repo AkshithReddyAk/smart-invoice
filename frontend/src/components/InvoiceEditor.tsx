@@ -484,14 +484,49 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       (selectedTemplate.mode === 'background' && selectedTemplate.field_mappings.items_table.enabled) ||
       (selectedTemplate.mode === 'docx' && docxHasItemRow);
 
+    const parseNumVal = (v: any) => {
+      if (!v) return 0;
+      const n = parseFloat(String(v).replace(/,/g, '').replace(/₹/g, '').trim());
+      return isNaN(n) ? 0 : n;
+    };
+    const tplTotal = parseNumVal(form.extra_fields.total_value || form.extra_fields.grand_total);
+    const tplTaxable = parseNumVal(form.extra_fields.taxable || form.extra_fields.Taxable || form.extra_fields.ex_showroom_price);
+    const tplCgst = parseNumVal(form.extra_fields.cgst_2_5_);
+    const tplSgst = parseNumVal(form.extra_fields.sgst_2_5_);
+    const tplGst = tplCgst + tplSgst || parseNumVal(form.extra_fields.gst_5_);
+
     const preparedItems = form.items.map((it, idx) => {
-      if (idx === 0 && !templateUsesItemsTable && !it.description.trim()) {
-        const modelDesc = [form.extra_fields.item_model, form.extra_fields.item_colour]
+      let desc = it.description;
+      if (idx === 0 && !templateUsesItemsTable && !desc.trim()) {
+        const modelDesc = [
+          form.extra_fields.material_model || form.extra_fields.item_model,
+          form.extra_fields.colour || form.extra_fields.item_colour,
+        ]
           .filter(Boolean)
           .join(' - ');
-        return { ...it, description: modelDesc || 'Invoice Item' };
+        desc = modelDesc || 'Electric Vehicle';
       }
-      return it;
+      let rate = it.rate;
+      let total_amount = it.total_amount;
+      let taxable_amount = it.taxable_amount;
+      let gst_amount = it.gst_amount;
+      let gst_percent = it.gst_percent;
+      if (idx === 0 && rate === 0 && tplTotal > 0) {
+        total_amount = tplTotal;
+        rate = tplTaxable || tplTotal;
+        taxable_amount = tplTaxable || tplTotal;
+        gst_percent = 5;
+        gst_amount = tplGst;
+      }
+      return {
+        ...it,
+        description: desc,
+        rate,
+        total_amount,
+        taxable_amount,
+        gst_amount,
+        gst_percent,
+      };
     });
 
     const hasCustomerFieldMapped =
