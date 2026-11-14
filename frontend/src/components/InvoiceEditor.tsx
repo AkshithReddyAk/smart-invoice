@@ -497,15 +497,46 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
     const hasCustomerFieldMapped =
       !selectedTemplate ||
       (selectedTemplate.mode === 'background'
-        ? selectedTemplate.field_mappings.fields.some(
-            (f) => f.field_key === 'customer_name' || f.field_key === 'bill_to'
+        ? selectedTemplate.field_mappings.fields.some((f) =>
+            ['customer_name', 'bill_to', 'bill_name', 'name'].includes(f.field_key.toLowerCase())
           )
-        : selectedTemplate.docx_placeholders.includes('customer_name'));
+        : selectedTemplate.docx_placeholders.some((p) =>
+            ['customer_name', 'bill_to', 'name'].includes(p.toLowerCase())
+          ));
+
+    const isDatePattern = (s: string) => /^\d{2}\/\d{2}\/\d{4}$|^\d{4}-\d{2}-\d{2}$/.test(s.trim());
 
     let resolvedCustomerName = form.customer_name.trim();
+    if (isDatePattern(resolvedCustomerName)) {
+      resolvedCustomerName = '';
+    }
+
+    if (!resolvedCustomerName) {
+      for (const k of ['Name', 'name', 'Bill_to', 'bill_to', 'bill_name', 'customer_name']) {
+        const val = String(form.extra_fields[k] || '').trim();
+        if (val && !isDatePattern(val)) {
+          resolvedCustomerName = val;
+          break;
+        }
+      }
+    }
+
     if (!resolvedCustomerName && !hasCustomerFieldMapped) {
-      const firstVal = Object.values(form.extra_fields).find((v) => String(v || '').trim() !== '');
-      resolvedCustomerName = (firstVal || 'Customer').trim();
+      const candidate = Object.entries(form.extra_fields).find(([k, v]) => {
+        const lk = k.toLowerCase();
+        const val = String(v || '').trim();
+        return (
+          !lk.includes('date') &&
+          !lk.includes('time') &&
+          !lk.includes('gst') &&
+          !lk.includes('tax') &&
+          !lk.includes('total') &&
+          !lk.includes('amount') &&
+          val !== '' &&
+          !isDatePattern(val)
+        );
+      });
+      resolvedCustomerName = (candidate ? candidate[1] : 'Customer').trim();
     }
 
     const preparedForm: InvoiceFormState = {

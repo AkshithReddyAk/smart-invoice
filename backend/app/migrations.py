@@ -65,6 +65,32 @@ def run_migrations() -> None:
                         default_asset = Path(__file__).resolve().parent / "assets" / "adms_invoice_template.pdf"
                         if default_asset.exists():
                             t.file_path = str(default_asset)
+
+        # Heal invoices where customer_name was accidentally set to a date
+        import re, json
+        from app.models import Invoice
+        date_pattern = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
+        invoices = db.query(Invoice).all()
+        for inv in invoices:
+            cname = (inv.customer_name or "").strip()
+            if not cname or date_pattern.match(cname):
+                extra = json.loads(inv.extra_fields_json or "{}")
+                resolved = ""
+                for k in ("Name", "name", "Bill_to", "bill_to", "bill_name", "customer_name"):
+                    cand = str(extra.get(k, "")).strip()
+                    if cand and not date_pattern.match(cand):
+                        resolved = cand
+                        break
+                if not resolved:
+                    for k, v in extra.items():
+                        lk = str(k).lower()
+                        cand = str(v).strip()
+                        if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not date_pattern.match(cand):
+                            resolved = cand
+                            break
+                if resolved:
+                    inv.customer_name = resolved
+
         db.commit()
     finally:
         db.close()

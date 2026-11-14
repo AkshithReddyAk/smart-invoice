@@ -1,6 +1,8 @@
 from datetime import date
 import json
 from pathlib import Path
+import re
+from typing import Any
 from urllib.parse import quote
 import uuid
 
@@ -123,6 +125,22 @@ def _resolve_template_path(tpl: InvoiceTemplate | None) -> Path | None:
     if default_asset.exists():
         return default_asset
     return None
+
+
+def _sanitize_customer_name(cname: str, extra: dict[str, Any]) -> str:
+    s = (cname or "").strip()
+    date_regex = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
+    if not s or date_regex.match(s):
+        for k in ("Name", "name", "Bill_to", "bill_to", "bill_name", "customer_name"):
+            cand = str(extra.get(k, "")).strip()
+            if cand and not date_regex.match(cand):
+                return cand
+        for k, v in extra.items():
+            lk = str(k).lower()
+            cand = str(v).strip()
+            if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not date_regex.match(cand):
+                return cand
+    return s or "Customer"
 
 
 def _render_invoice_artifacts(inv: Invoice, tpl: InvoiceTemplate | None, invoice_dict: dict) -> tuple[str, str]:
@@ -323,7 +341,7 @@ def create_invoice(payload: InvoicePayload, db: Session = Depends(get_db)):
         place_of_supply=payload.place_of_supply,
         payment_terms=payload.payment_terms,
         po_number=payload.po_number,
-        customer_name=payload.customer_name,
+        customer_name=_sanitize_customer_name(payload.customer_name, payload.extra_fields),
         billing_address=payload.billing_address,
         shipping_address=payload.shipping_address,
         customer_gstin=payload.customer_gstin,
@@ -445,7 +463,7 @@ def update_invoice(invoice_id: str, payload: InvoicePayload, db: Session = Depen
     inv.place_of_supply = payload.place_of_supply
     inv.payment_terms = payload.payment_terms
     inv.po_number = payload.po_number
-    inv.customer_name = payload.customer_name
+    inv.customer_name = _sanitize_customer_name(payload.customer_name, payload.extra_fields)
     inv.billing_address = payload.billing_address
     inv.shipping_address = payload.shipping_address
     inv.customer_gstin = payload.customer_gstin

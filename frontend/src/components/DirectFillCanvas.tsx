@@ -140,11 +140,24 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
         next.due_date = rawVal;
       } else if (k === 'po_number') {
         next.po_number = rawVal;
-      } else if (k === 'customer_name' || k === 'bill_to') {
+      } else if (
+        k === 'customer_name' ||
+        k === 'bill_to' ||
+        k === 'Bill_to' ||
+        k === 'Name' ||
+        k === 'name' ||
+        k === 'bill_name'
+      ) {
         next.customer_name = rawVal;
+        next.extra_fields[k] = rawVal;
+        if (k === 'Name') next.extra_fields.bill_name = rawVal;
         if (mirrorShipTo) {
-          next.extra_fields.bill_name = rawVal;
+          next.extra_fields.Name = rawVal;
+          next.extra_fields.name = rawVal;
+          next.extra_fields.bill_to = rawVal;
+          next.extra_fields.Bill_to = rawVal;
           next.extra_fields.shipped_to = rawVal;
+          next.extra_fields.bill_name = rawVal;
           next.extra_fields.ship_name = rawVal;
         }
       } else if (k === 'bill_name') {

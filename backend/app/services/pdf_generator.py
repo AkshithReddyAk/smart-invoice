@@ -72,6 +72,18 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
         else:
             display_date = inv_date_str
 
+    cname = str(invoice_dict.get("customer_name", "") or "").strip()
+    import re
+    date_regex = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
+    if date_regex.match(cname):
+        cname = ""
+    if not cname:
+        for ck in ("Name", "name", "Bill_to", "bill_to", "bill_name", "customer_name"):
+            cand = str(extra.get(ck, "")).strip()
+            if cand and not date_regex.match(cand):
+                cname = cand
+                break
+
     mapping = {
         # Company
         "company_name": str(comp.get("company_name", "")),
@@ -94,9 +106,9 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
         "payment_terms": str(invoice_dict.get("payment_terms", "")),
         "po_number": str(invoice_dict.get("po_number", "")),
         # Customer
-        "customer_name": str(invoice_dict.get("customer_name", "")),
-        "bill_to": str(invoice_dict.get("customer_name", "")),
-        "ship_to": str(invoice_dict.get("customer_name", "")),
+        "customer_name": cname,
+        "bill_to": str(extra.get("Bill_to") or extra.get("bill_to") or cname),
+        "ship_to": str(extra.get("shipped_to") or extra.get("ship_to") or cname),
         "billing_address": str(invoice_dict.get("billing_address", "")),
         "shipping_address": str(invoice_dict.get("shipping_address", "") or invoice_dict.get("billing_address", "")),
         "customer_gstin": str(invoice_dict.get("customer_gstin", "")),
