@@ -10,8 +10,8 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Prevent auto-zoom on iOS Safari when focusing form inputs on mobile */
-  @media (max-width: 640px) {
+  /* Prevent auto-zoom on iOS Safari when focusing form inputs on mobile & tablets */
+  @media (max-width: 1024px) {
     input:not([type="checkbox"]):not([type="radio"]),
     select,
     textarea {
