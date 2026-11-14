@@ -64,5 +64,9 @@ if os.path.exists(frontend_dist) and not os.getenv("PYTEST_CURRENT_TEST"):
         target_file = os.path.join(frontend_dist, full_path)
         if full_path and os.path.isfile(target_file):
             return FileResponse(target_file)
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+        response = FileResponse(os.path.join(frontend_dist, "index.html"))
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 

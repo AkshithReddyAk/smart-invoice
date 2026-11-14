@@ -129,7 +129,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     }}
                     placeholder="Enter 10-digit number"
                     maxLength={14}
-                    className="flex-1 min-w-0 bg-transparent py-3 px-3 sm:px-3.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
+                    className="flex-1 min-w-0 w-full bg-transparent py-3 px-3 sm:px-3.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                       if (error) setError('');
                     }}
                     placeholder="Enter password"
-                    className="flex-1 min-w-0 bg-transparent py-3 px-2.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
+                    className="flex-1 min-w-0 w-full bg-transparent py-3 px-2.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none border-0 focus:ring-0 touch-manipulation"
                   />
                   <button
                     type="button"
