@@ -91,10 +91,10 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
   const getFieldDisplayValue = (fld: FieldOverlay): string => {
     const k = fld.field_key;
     if (k === 'date' || k === 'invoice_date' || k === 'display_date') {
-      if (k in form.extra_fields && form.extra_fields[k]) {
-        return isoToDmy(form.extra_fields[k]);
+      if (k in form.extra_fields) {
+        return form.extra_fields[k] ? isoToDmy(form.extra_fields[k]) : '';
       }
-      return isoToDmy(form.invoice_date);
+      return form.invoice_date ? isoToDmy(form.invoice_date) : '';
     }
     if (k in form.extra_fields) {
       return form.extra_fields[k];
@@ -130,8 +130,12 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
         next.extra_fields.date = rawVal;
         next.extra_fields.display_date = rawVal;
         next.extra_fields.invoice_date = rawVal;
-        const iso = normalizeDisplayDateToIso(rawVal);
-        if (iso) next.invoice_date = iso;
+        if (!rawVal.trim()) {
+          next.invoice_date = '';
+        } else {
+          const iso = normalizeDisplayDateToIso(rawVal);
+          if (iso) next.invoice_date = iso;
+        }
       } else if (k === 'due_date') {
         next.due_date = rawVal;
       } else if (k === 'po_number') {
@@ -404,6 +408,10 @@ export const DirectFillCanvas: React.FC<DirectFillCanvasProps> = ({
                   onChange={(e) => {
                     let text = e.target.value;
                     if (isDateField) {
+                      if (!text.trim()) {
+                        handleFieldChange(fld, '');
+                        return;
+                      }
                       const clean = text.replace(/[^\d/]/g, '');
                       if (clean.length === 8 && !clean.includes('/')) {
                         text = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`;

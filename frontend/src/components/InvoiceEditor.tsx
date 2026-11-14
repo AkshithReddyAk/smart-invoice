@@ -341,7 +341,12 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           next.invoice_number = val;
           break;
         case 'invoice_date':
+        case 'date':
+        case 'display_date':
           next.invoice_date = val;
+          next.extra_fields.date = val;
+          next.extra_fields.display_date = val;
+          next.extra_fields.invoice_date = val;
           break;
         case 'due_date':
           next.due_date = val;
