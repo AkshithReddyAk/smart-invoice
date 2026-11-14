@@ -69,27 +69,33 @@ def run_migrations() -> None:
         # Heal invoices where customer_name was accidentally set to a date
         import re, json
         from app.models import Invoice
-        date_pattern = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
+
+        def _is_date_str(val):
+            s = str(val or "").strip()
+            return bool(re.match(r"^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$", s)) if s else False
+
         invoices = db.query(Invoice).all()
         for inv in invoices:
             cname = (inv.customer_name or "").strip()
-            if not cname or date_pattern.match(cname):
+            if not cname or _is_date_str(cname):
                 extra = json.loads(inv.extra_fields_json or "{}")
                 resolved = ""
                 for k in ("Name", "name", "Bill_to", "bill_to", "bill_name", "customer_name"):
                     cand = str(extra.get(k, "")).strip()
-                    if cand and not date_pattern.match(cand):
+                    if cand and not _is_date_str(cand):
                         resolved = cand
                         break
                 if not resolved:
                     for k, v in extra.items():
                         lk = str(k).lower()
                         cand = str(v).strip()
-                        if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not date_pattern.match(cand):
+                        if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not _is_date_str(cand):
                             resolved = cand
                             break
                 if resolved:
                     inv.customer_name = resolved
+                elif _is_date_str(inv.customer_name):
+                    inv.customer_name = "Customer"
 
         # Heal totals from extra_fields for existing invoices
         def _parse_val(val):

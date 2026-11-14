@@ -26,6 +26,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const fmt = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const isDatePattern = (s: string) => /^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$/.test(s.trim());
+
+  const getDisplayCustomer = (inv: any): string => {
+    const raw = (inv.customer_name || '').trim();
+    if (raw && !isDatePattern(raw)) {
+      return raw;
+    }
+    if (inv.extra_fields) {
+      for (const k of ['Name', 'name', 'Bill_to', 'bill_to', 'bill_name', 'customer_name']) {
+        const val = String(inv.extra_fields[k] || '').trim();
+        if (val && !isDatePattern(val)) {
+          return val;
+        }
+      }
+      for (const [k, v] of Object.entries(inv.extra_fields)) {
+        const lk = k.toLowerCase();
+        const cand = String(v || '').trim();
+        if (
+          !lk.includes('date') &&
+          !lk.includes('time') &&
+          !lk.includes('gst') &&
+          !lk.includes('tax') &&
+          !lk.includes('total') &&
+          !lk.includes('amount') &&
+          !lk.includes('no') &&
+          !lk.includes('price') &&
+          cand &&
+          !isDatePattern(cand)
+        ) {
+          return cand;
+        }
+      }
+    }
+    return raw && !isDatePattern(raw) ? raw : 'Customer';
+  };
+
   const getDisplayTotal = (inv: any): number => {
     if (inv.grand_total > 0) return inv.grand_total;
     const tplVal = inv.extra_fields?.total_value || inv.extra_fields?.total || inv.extra_fields?.grand_total;
@@ -144,7 +180,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{inv.invoice_number}</div>
-                      <div className="text-xs text-slate-600 font-medium">{inv.customer_name}</div>
+                      <div className="text-xs text-slate-600 font-medium">{getDisplayCustomer(inv)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-indigo-700">₹ {fmt(getDisplayTotal(inv))}</div>
@@ -193,7 +229,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <td className="px-5 py-3 font-semibold text-slate-900">
                         {inv.invoice_number}
                       </td>
-                      <td className="px-5 py-3 text-slate-700">{inv.customer_name}</td>
+                      <td className="px-5 py-3 text-slate-700">{getDisplayCustomer(inv)}</td>
                       <td className="px-5 py-3 text-slate-600">{inv.invoice_date}</td>
                       <td className="px-5 py-3 text-slate-600">
                         {inv.template_name_snapshot || 'Standard A4'}

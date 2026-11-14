@@ -74,7 +74,7 @@ def build_field_value_map(invoice_dict: dict[str, Any]) -> dict[str, str]:
 
     cname = str(invoice_dict.get("customer_name", "") or "").strip()
     import re
-    date_regex = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
+    date_regex = re.compile(r"^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$")
     if date_regex.match(cname):
         cname = ""
     if not cname:

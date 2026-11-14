@@ -176,7 +176,7 @@ class InvoicePayload(BaseModel):
     payment_terms: str = ""
     po_number: str = ""
 
-    customer_name: str
+    customer_name: str = ""
     billing_address: str = ""
     shipping_address: str = ""
     customer_gstin: str = ""
@@ -196,7 +196,7 @@ class InvoicePayload(BaseModel):
     items: list[InvoiceItemInput] = Field(min_length=1)
     confirm_overwrite: bool = False
 
-    @field_validator("invoice_number", "customer_name")
+    @field_validator("invoice_number")
     @classmethod
     def not_blank(cls, v: str, info) -> str:
         cleaned = v.strip()

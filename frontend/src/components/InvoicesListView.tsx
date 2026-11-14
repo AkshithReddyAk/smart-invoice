@@ -100,6 +100,42 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
   const fmt = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const isDatePattern = (s: string) => /^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$/.test(s.trim());
+
+  const getDisplayCustomer = (inv: InvoiceRecord): string => {
+    const raw = (inv.customer_name || '').trim();
+    if (raw && !isDatePattern(raw)) {
+      return raw;
+    }
+    if (inv.extra_fields) {
+      for (const k of ['Name', 'name', 'Bill_to', 'bill_to', 'bill_name', 'customer_name']) {
+        const val = String(inv.extra_fields[k] || '').trim();
+        if (val && !isDatePattern(val)) {
+          return val;
+        }
+      }
+      for (const [k, v] of Object.entries(inv.extra_fields)) {
+        const lk = k.toLowerCase();
+        const cand = String(v || '').trim();
+        if (
+          !lk.includes('date') &&
+          !lk.includes('time') &&
+          !lk.includes('gst') &&
+          !lk.includes('tax') &&
+          !lk.includes('total') &&
+          !lk.includes('amount') &&
+          !lk.includes('no') &&
+          !lk.includes('price') &&
+          cand &&
+          !isDatePattern(cand)
+        ) {
+          return cand;
+        }
+      }
+    }
+    return raw && !isDatePattern(raw) ? raw : 'Customer';
+  };
+
   const getDisplayTotal = (inv: InvoiceRecord): number => {
     if (inv.grand_total > 0) return inv.grand_total;
     const tplVal = inv.extra_fields?.total_value || inv.extra_fields?.total || inv.extra_fields?.grand_total;
@@ -194,7 +230,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-700 font-medium mt-0.5">{inv.customer_name}</div>
+                      <div className="text-xs text-slate-700 font-medium mt-0.5">{getDisplayCustomer(inv)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-indigo-700">₹ {fmt(getDisplayTotal(inv))}</div>
@@ -284,7 +320,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{inv.customer_name}</td>
+                      <td className="px-4 py-3 text-slate-700">{getDisplayCustomer(inv)}</td>
                       <td className="px-4 py-3 text-slate-600">{inv.invoice_date}</td>
                       <td className="px-4 py-3 text-slate-600">
                         {inv.template_name_snapshot || 'Standard A4'}
@@ -368,7 +404,7 @@ export const InvoicesListView: React.FC<InvoicesListViewProps> = ({
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
               <div>
                 <div className="font-bold uppercase text-slate-500">Customer</div>
-                <div className="mt-1 font-semibold text-slate-900">{viewingInv.customer_name}</div>
+                <div className="mt-1 font-semibold text-slate-900">{getDisplayCustomer(viewingInv)}</div>
                 <div className="whitespace-pre-line text-slate-600">{viewingInv.billing_address}</div>
                 {viewingInv.customer_phone && <div>Phone: {viewingInv.customer_phone}</div>}
                 {viewingInv.customer_gstin && <div>GSTIN: {viewingInv.customer_gstin}</div>}

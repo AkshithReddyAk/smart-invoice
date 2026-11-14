@@ -127,20 +127,26 @@ def _resolve_template_path(tpl: InvoiceTemplate | None) -> Path | None:
     return None
 
 
+def _is_date_string(val: Any) -> bool:
+    s = str(val or "").strip()
+    if not s:
+        return False
+    return bool(re.match(r"^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$", s))
+
+
 def _sanitize_customer_name(cname: str, extra: dict[str, Any]) -> str:
     s = (cname or "").strip()
-    date_regex = re.compile(r"^(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})$")
-    if not s or date_regex.match(s):
+    if not s or _is_date_string(s):
         for k in ("Name", "name", "Bill_to", "bill_to", "bill_name", "customer_name"):
             cand = str(extra.get(k, "")).strip()
-            if cand and not date_regex.match(cand):
+            if cand and not _is_date_string(cand):
                 return cand
         for k, v in extra.items():
             lk = str(k).lower()
             cand = str(v).strip()
-            if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not date_regex.match(cand):
+            if not any(d in lk for d in ("date", "time", "gst", "tax", "total", "amount", "no", "id", "price")) and cand and not _is_date_string(cand):
                 return cand
-    return s or "Customer"
+    return s if not _is_date_string(s) else "Customer"
 
 
 def _parse_num(val: Any) -> float:

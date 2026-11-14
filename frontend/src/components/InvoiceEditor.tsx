@@ -539,7 +539,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
             ['customer_name', 'bill_to', 'name'].includes(p.toLowerCase())
           ));
 
-    const isDatePattern = (s: string) => /^\d{2}\/\d{2}\/\d{4}$|^\d{4}-\d{2}-\d{2}$/.test(s.trim());
+    const isDatePattern = (s: string) => /^\d{1,4}[-/\.]\d{1,2}[-/\.]\d{2,4}$/.test(s.trim());
 
     let resolvedCustomerName = form.customer_name.trim();
     if (isDatePattern(resolvedCustomerName)) {
@@ -556,7 +556,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       }
     }
 
-    if (!resolvedCustomerName && !hasCustomerFieldMapped) {
+    if (!resolvedCustomerName) {
       const candidate = Object.entries(form.extra_fields).find(([k, v]) => {
         const lk = k.toLowerCase();
         const val = String(v || '').trim();
@@ -567,11 +567,13 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           !lk.includes('tax') &&
           !lk.includes('total') &&
           !lk.includes('amount') &&
+          !lk.includes('no') &&
+          !lk.includes('price') &&
           val !== '' &&
           !isDatePattern(val)
         );
       });
-      resolvedCustomerName = (candidate ? candidate[1] : 'Customer').trim();
+      resolvedCustomerName = (candidate ? candidate[1] : (form.customer_name && !isDatePattern(form.customer_name) ? form.customer_name : 'Customer')).trim();
     }
 
     const preparedForm: InvoiceFormState = {
