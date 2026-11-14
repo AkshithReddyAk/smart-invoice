@@ -45,5 +45,26 @@ def run_migrations() -> None:
         if "paper_size" not in cols:
             db.execute(text("ALTER TABLE invoices ADD COLUMN paper_size VARCHAR(32) DEFAULT 'A4' NOT NULL"))
             db.commit()
+
+        # Heal template file paths if pointing to another host / environment
+        from pathlib import Path
+        from app.config import TEMPLATES_DIR
+        from app.models import InvoiceTemplate
+        templates = db.query(InvoiceTemplate).all()
+        for t in templates:
+            p = Path(t.file_path) if t.file_path else None
+            if not p or not p.exists():
+                cand = TEMPLATES_DIR / p.name if p else None
+                if cand and cand.exists():
+                    t.file_path = str(cand)
+                else:
+                    matched = list(TEMPLATES_DIR.glob(f"{t.id}*"))
+                    if matched and matched[0].is_file():
+                        t.file_path = str(matched[0])
+                    else:
+                        default_asset = Path(__file__).resolve().parent / "assets" / "adms_invoice_template.pdf"
+                        if default_asset.exists():
+                            t.file_path = str(default_asset)
+        db.commit()
     finally:
         db.close()

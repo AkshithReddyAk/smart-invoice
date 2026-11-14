@@ -13,7 +13,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.config import INVOICES_DIR
+from app.config import INVOICES_DIR, TEMPLATES_DIR
 from app.database import get_db
 from app.models import CompanySettings, Invoice, InvoiceItem, InvoiceTemplate
 from app.schemas import (
@@ -106,18 +106,38 @@ def _generate_fallback_pdf(invoice_dict: dict, out_pdf_path: Path) -> Path:
     return out_pdf_path
 
 
+def _resolve_template_path(tpl: InvoiceTemplate | None) -> Path | None:
+    if not tpl or not tpl.file_path:
+        return None
+    p = Path(tpl.file_path)
+    if p.exists():
+        return p
+    filename = p.name
+    cand = TEMPLATES_DIR / filename
+    if cand.exists():
+        return cand
+    matched = list(TEMPLATES_DIR.glob(f"{tpl.id}*"))
+    if matched and matched[0].is_file():
+        return matched[0]
+    default_asset = Path(__file__).resolve().parent.parent / "assets" / "adms_invoice_template.pdf"
+    if default_asset.exists():
+        return default_asset
+    return None
+
+
 def _render_invoice_artifacts(inv: Invoice, tpl: InvoiceTemplate | None, invoice_dict: dict) -> tuple[str, str]:
     pdf_path = INVOICES_DIR / f"{inv.id}.pdf"
     docx_path = ""
+    tpl_path = _resolve_template_path(tpl)
     try:
-        if tpl and Path(tpl.file_path).exists():
+        if tpl and tpl_path:
             if tpl.mode == "docx":
                 out_docx = INVOICES_DIR / f"{inv.id}.docx"
-                generate_docx_mode_pdf(tpl.file_path, invoice_dict, pdf_path, out_docx)
+                generate_docx_mode_pdf(str(tpl_path), invoice_dict, pdf_path, out_docx)
                 docx_path = str(out_docx)
             else:
                 mappings = json.loads(tpl.field_mappings_json or "{}")
-                generate_background_mode_pdf(tpl.file_path, tpl.file_type, mappings, invoice_dict, pdf_path)
+                generate_background_mode_pdf(str(tpl_path), tpl.file_type, mappings, invoice_dict, pdf_path)
         else:
             _generate_fallback_pdf(invoice_dict, pdf_path)
     except Exception as exc:
@@ -234,7 +254,10 @@ def preview_docx_live(payload: InvoicePayload, db: Session = Depends(get_db)):
         "company_details": comp,
         "amount_in_words": (payload.amount_in_words or "").strip() or calc["amount_in_words"],
     }
-    return render_populated_docx_structure(tpl.file_path, invoice_dict)
+    tpl_path = _resolve_template_path(tpl)
+    if not tpl_path:
+        raise HTTPException(status_code=404, detail="DOCX template file not found on disk")
+    return render_populated_docx_structure(str(tpl_path), invoice_dict)
 
 
 @router.get("", response_model=list[InvoiceOut])

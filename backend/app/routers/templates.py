@@ -202,6 +202,22 @@ def get_template_page_image(template_id: str, page_num: int, db: Session = Depen
     return FileResponse(img_path, media_type="image/png")
 
 
+def _resolve_tpl_path(tpl: InvoiceTemplate) -> Path:
+    p = Path(tpl.file_path) if tpl.file_path else None
+    if p and p.exists():
+        return p
+    cand = TEMPLATES_DIR / p.name if p else None
+    if cand and cand.exists():
+        return cand
+    matched = list(TEMPLATES_DIR.glob(f"{tpl.id}*"))
+    if matched and matched[0].is_file():
+        return matched[0]
+    default_asset = Path(__file__).resolve().parent.parent / "assets" / "adms_invoice_template.pdf"
+    if default_asset.exists():
+        return default_asset
+    return p or Path(tpl.file_path)
+
+
 @router.get("/{template_id}/docx-structure")
 def get_docx_template_structure(template_id: str, db: Session = Depends(get_db)):
     tpl = db.query(InvoiceTemplate).filter(InvoiceTemplate.id == template_id).first()
@@ -209,7 +225,8 @@ def get_docx_template_structure(template_id: str, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail="Template not found")
     if tpl.mode != "docx":
         raise HTTPException(status_code=400, detail="Template is not a DOCX template")
-    return extract_docx_structure(tpl.file_path)
+    tpl_path = _resolve_tpl_path(tpl)
+    return extract_docx_structure(str(tpl_path))
 
 
 @router.get("/{template_id}/pdf-widgets")
@@ -221,7 +238,8 @@ def get_pdf_embedded_widgets(template_id: str, db: Session = Depends(get_db)):
     if tpl.file_type != "pdf":
         return {"widgets": []}
 
-    doc = fitz.open(str(tpl.file_path))
+    tpl_path = _resolve_tpl_path(tpl)
+    doc = fitz.open(str(tpl_path))
     extracted = []
     try:
         for p_idx, page in enumerate(doc, start=1):
@@ -283,8 +301,9 @@ def locate_label_position(
         return {"found": False}
 
     prev_path = (PREVIEWS_DIR / match["filename"]).resolve()
+    tpl_path = _resolve_tpl_path(tpl)
     return locate_field_on_template(
-        tpl.file_path,
+        str(tpl_path),
         tpl.file_type,
         prev_path,
         field_key=field_key,
@@ -315,8 +334,9 @@ def detect_box_style(
         return {"font_size": 9.0, "font_weight": "normal", "color": "#111827", "align": "left"}
 
     prev_path = (PREVIEWS_DIR / match["filename"]).resolve()
+    tpl_path = _resolve_tpl_path(tpl)
     return detect_style_near_box(
-        tpl.file_path,
+        str(tpl_path),
         tpl.file_type,
         prev_path,
         x_pct=float(payload.get("x_pct", 0)),
@@ -352,8 +372,9 @@ def match_all_field_styles(
             updated_fields.append(fld)
             continue
         prev_path = (PREVIEWS_DIR / match["filename"]).resolve()
+        tpl_path = _resolve_tpl_path(tpl)
         st = detect_style_near_box(
-            tpl.file_path,
+            str(tpl_path),
             tpl.file_type,
             prev_path,
             x_pct=float(fld.get("x_pct", 0)),
